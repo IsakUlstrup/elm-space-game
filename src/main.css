@@ -9,13 +9,14 @@
   height: inherit;
 }
 
-body {
-  font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
+* {
   margin: 0;
-  color: #293c4b;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-
-.player {
-  margin: 1rem;
+body {
+  font-family: 'Source Sans Pro', 'Trebuchet MS', 'Lucida Grande', 'Bitstream Vera Sans', 'Helvetica Neue', sans-serif;
+  color: #293c4b;
+  padding: 2rem;
 }

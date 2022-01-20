@@ -1,7 +1,7 @@
 module Components exposing (..)
 
 import ComponentData exposing (getStat, noCompData, statCompData)
-import Components.Stat exposing (StatType(..), getSumStats, hullStat, powerStat, shieldStat, statAdd, statEq)
+import Components.Stat exposing (StatType(..), getSumStats, hullStat, powerStat, reduceStatValue, shieldStat, statAdd, statEq)
 import Expect
 import Test exposing (..)
 
@@ -149,4 +149,28 @@ stat =
                     []
                     |> Expect.equal
                         []
+        , test "Reduce the value of a 5 value power stat by 2" <|
+            \_ ->
+                reduceStatValue 2 (powerStat 5)
+                    |> Expect.equal
+                        { value = 3
+                        , cap = 5
+                        , statType = Power
+                        }
+        , test "Reduce the value of a 5 value power stat by 7" <|
+            \_ ->
+                reduceStatValue 7 (powerStat 5)
+                    |> Expect.equal
+                        { value = 0
+                        , cap = 5
+                        , statType = Power
+                        }
+        , test "Reduce the value of a 5 value power stat by -7" <|
+            \_ ->
+                reduceStatValue -7 (powerStat 5)
+                    |> Expect.equal
+                        { value = 5
+                        , cap = 5
+                        , statType = Power
+                        }
         ]

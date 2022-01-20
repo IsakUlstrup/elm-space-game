@@ -7,6 +7,7 @@ module Components.Stat exposing
     , getSumStats
     , hullStat
     , powerStat
+    , reduceStatValue
     , shieldStat
     , statAdd
     , statEq
@@ -121,6 +122,13 @@ statAdd stat1 stat2 =
                     stat1
 
 
+{-| Reduce the value of a stat by amount
+-}
+reduceStatValue : Int -> Stat -> Stat
+reduceStatValue amount stat =
+    { stat | value = clamp 0 stat.cap (stat.value - amount) }
+
+
 {-| Given a target stat and a list of stats, return the sum of stats that match target
 -}
 getSumStat : Stat -> List Stat -> Maybe Stat
@@ -154,7 +162,7 @@ getSumShield stats =
     getSumStat (shieldStat 0) stats
 
 
-{-| Given a lsit of stats, sum them together and return a list of summed stats
+{-| Given a list of stats, sum them together and return a list of summed stats
 -}
 getSumStats : List Stat -> List Stat
 getSumStats stats =
