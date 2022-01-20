@@ -5,160 +5,176 @@ module Ecs exposing
     , addEntity
     , addSystem
     , emptyScene
-    , entities
-    , entityId
-    , filterEntities
-    , foldScene
-    , getComponents
-    , mapComponents
-    , mapEntities
-    , removeComponent
-    , removeEntity
+    , getComponentsOfType
+    , getEntitiesWithComponents
     , runSystems
-    , seed
-    , setSeed
-    , updateComponent
-    , updateEntity
     )
 
 import Random
 
 
-type Entity c
-    = Entity
-        { id : Int
-        , components : List c
+{-| Id alias for Entity/Component ids
+-}
+type alias Id =
+    Int
+
+
+{-| Component, compData is the type stored in each component, usually a union type
+
+This type is not exposed to avoid mixing up Component and compData
+
+-}
+type Component compData
+    = Component
+        { id : Id
+        , parent : Entity
+        , data : compData
         }
 
 
-type System c msg
-    = System (msg -> Scene c msg -> Scene c msg)
+{-| Entity is just an id used to associate entities and components
+-}
+type Entity
+    = Entity Id
 
 
-type Scene c msg
+{-| A system is a function that transforms the scene when given a message
+-}
+type System compData msg
+    = System (msg -> Scene compData msg -> Scene compData msg)
+
+
+{-| A Scene is a container for entities, components and systems
+, as well as an id counter to keep track of new ids and a Random seed to help with RNG
+-}
+type Scene compData msg
     = Scene
-        { entities : List (Entity c)
-        , systems : List (System c msg)
+        { entities : List Entity
+        , components : List (Component compData)
+        , systems : List (System compData msg)
         , seed : Random.Seed
-        , idCounter : Int
+        , idCounter : Id
         }
 
 
-emptyScene : Scene c msg
-emptyScene =
+
+---- SCENE ----
+
+
+{-| Construct new empty scene
+-}
+emptyScene : Int -> Scene compData msg
+emptyScene seedInit =
     Scene
         { entities = []
+        , components = []
         , systems = []
-        , seed = Random.initialSeed 20
+        , seed = Random.initialSeed seedInit
         , idCounter = 0
         }
 
 
-foldScene : (Entity c -> Scene c msg -> Scene c msg) -> Scene c msg -> List (Entity c) -> Scene c msg
-foldScene func scene ents =
-    case ents of
-        [] ->
-            scene
 
-        e :: es ->
-            func e (foldScene func scene es)
+---- ENTITY ----
 
 
-addEntity : List c -> Scene c msg -> Scene c msg
+addEntity : List compData -> Scene compData msg -> Scene compData msg
 addEntity components (Scene scene) =
+    let
+        entity =
+            Entity scene.idCounter
+    in
     Scene
         { scene
-            | entities = Entity { id = scene.idCounter, components = components } :: scene.entities
+            | entities = entity :: scene.entities
+            , idCounter = scene.idCounter + 1
+        }
+        |> addComponents entity components
+
+
+{-| Get a list of entities with their components, useful for rendering
+-}
+getEntitiesWithComponents : Scene compData msg -> List ( Entity, List compData )
+getEntitiesWithComponents (Scene scene) =
+    let
+        compData : Entity -> Component compData -> Maybe compData
+        compData e (Component c) =
+            if c.parent == e then
+                Just c.data
+
+            else
+                Nothing
+    in
+    List.map
+        (\e ->
+            ( e, List.filterMap (compData e) scene.components )
+        )
+        scene.entities
+
+
+
+---- COMPONENT ----
+
+
+{-| Create a new component with parent as parent and compData as data
+-}
+addComponent : Entity -> compData -> Scene compData msg -> Scene compData msg
+addComponent parent compData (Scene scene) =
+    Scene
+        { scene
+            | components = Component { id = scene.idCounter, parent = parent, data = compData } :: scene.components
             , idCounter = scene.idCounter + 1
         }
 
 
+{-| Add list of component data with parent as parent
+-}
+addComponents : Entity -> List compData -> Scene compData msg -> Scene compData msg
+addComponents parent compDatas scene =
+    case compDatas of
+        [] ->
+            scene
 
--- maybe manage this, so we can't mess up seeds
-
-
-seed : Scene c msg -> Random.Seed
-seed (Scene scene) =
-    scene.seed
-
-
-setSeed : Random.Seed -> Scene c msg -> Scene c msg
-setSeed sd (Scene scene) =
-    Scene { scene | seed = sd }
+        d :: ds ->
+            addComponent parent d (addComponents parent ds scene)
 
 
-entities : Scene c msg -> List (Entity c)
-entities (Scene scene) =
-    scene.entities
-
-
-removeEntity : Entity c -> Scene c msg -> Scene c msg
-removeEntity entity (Scene scene) =
-    Scene { scene | entities = List.filter (\e -> e /= entity) scene.entities }
-
-
-
-{- Filter out any entities that do not meet perdicate -}
-
-
-filterEntities : (Entity c -> Bool) -> Scene c msg -> Scene c msg
-filterEntities pred (Scene scene) =
-    Scene { scene | entities = List.filter pred scene.entities }
-
-
-mapEntities : (Entity c -> Entity c) -> Scene c msg -> Scene c msg
-mapEntities func (Scene scene) =
-    Scene { scene | entities = List.map func scene.entities }
-
-
-updateEntity : Entity c -> Scene c msg -> Scene c msg
-updateEntity (Entity entity) (Scene scene) =
+{-| Given a filter function and a list of Components, return compData that passes filter
+-}
+getComponentsOfType : (compData -> Bool) -> List (Component compData) -> List compData
+getComponentsOfType filter comps =
     let
-        update (Entity e) =
-            if e.id == entity.id then
-                Entity { e | components = entity.components }
+        getCompData : Component compData -> Maybe compData
+        getCompData (Component c) =
+            if filter c.data then
+                Just c.data
 
             else
-                Entity e
+                Nothing
     in
-    Scene { scene | entities = List.map update scene.entities }
+    List.filterMap
+        getCompData
+        comps
 
 
-entityId : Entity c -> Int
-entityId (Entity entity) =
-    entity.id
+
+---- SYSTEM ----
 
 
-getComponents : Entity c -> List c
-getComponents (Entity entity) =
-    entity.components
-
-
-mapComponents : (c -> c) -> Entity c -> Entity c
-mapComponents func (Entity entity) =
-    Entity { entity | components = List.map func entity.components }
-
-
-removeComponent : c -> (c -> c -> Bool) -> Entity c -> Entity c
-removeComponent cd hasComponent (Entity entity) =
-    Entity { entity | components = List.filter (\c -> hasComponent cd c |> not) entity.components }
-
-
-updateComponent : c -> (c -> c -> Bool) -> Entity c -> Entity c
-updateComponent cd hasComponent (Entity entity) =
-    Entity { entity | components = cd :: List.filter (\c -> hasComponent cd c |> not) entity.components }
-
-
+{-| Add a system to a scene
+-}
 addSystem : (msg -> Scene c msg -> Scene c msg) -> Scene c msg -> Scene c msg
 addSystem system (Scene scene) =
     Scene { scene | systems = System system :: scene.systems }
 
 
-runSystem : msg -> System c msg -> Scene c msg -> Scene c msg
-runSystem msg (System system) scene =
-    system msg scene
-
-
+{-| Run all systems in a scene and return the resulting scene
+-}
 runSystems : msg -> Scene c msg -> Scene c msg
 runSystems msg ((Scene scene) as sc) =
+    let
+        runSystem : msg -> System c msg -> Scene c msg -> Scene c msg
+        runSystem m (System system) s =
+            system m s
+    in
     List.foldl (runSystem msg) sc scene.systems

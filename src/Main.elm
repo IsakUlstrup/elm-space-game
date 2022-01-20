@@ -1,32 +1,42 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, text, div, h1, img)
-import Html.Attributes exposing (src)
-
-
----- MODEL ----
-
-
-type alias Model =
-    {}
-
-
-init : ( Model, Cmd Msg )
-init =
-    ( {}, Cmd.none )
-
-
-
----- UPDATE ----
+import Ecs
+import GameData exposing (GameScene)
+import Html exposing (Html, div)
+import View
 
 
 type Msg
     = NoOp
 
 
+
+---- MODEL ----
+
+
+type alias Model =
+    GameScene
+
+
+init : ( Model, Cmd Msg )
+init =
+    ( Ecs.emptyScene 0
+        |> Ecs.addEntity []
+        |> Ecs.addEntity []
+        |> Ecs.addEntity []
+        |> Ecs.addEntity []
+        |> Ecs.addEntity []
+    , Cmd.none
+    )
+
+
+
+---- UPDATE ----
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update _ model =
     ( model, Cmd.none )
 
 
@@ -37,8 +47,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ img [ src "/logo.svg" ] []
-        , h1 [] [ text "Your Elm App is working!" ]
+        [ View.viewScene model
         ]
 
 
