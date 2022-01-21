@@ -6,8 +6,6 @@ module Ecs exposing
     , addEntity
     , addSystem
     , emptyScene
-    , getComponentsOfType
-    , getEntitiesWithComponents
     , idToInt
     , mapEntitiesWithComponents
     , runSystems
@@ -122,27 +120,7 @@ addEntity components (Scene scene) =
         |> addComponents entity components
 
 
-{-| Get a list of entities with their components, useful for rendering
--}
-getEntitiesWithComponents : Scene compData msg -> List ( Entity, List compData )
-getEntitiesWithComponents (Scene scene) =
-    let
-        compData : Entity -> Component compData -> Maybe compData
-        compData e (Component c) =
-            if c.parent == e then
-                Just c.data
-
-            else
-                Nothing
-    in
-    List.map
-        (\e ->
-            ( e, List.filterMap (compData e) scene.components )
-        )
-        scene.entities
-
-
-{-| Map entities given a function that takes an entity and a list of id component tuples
+{-| Map entities given a function that takes an entity and a list of id component tuples, useful for rendering
 -}
 mapEntitiesWithComponents : (( Entity, List ( EcsId, compData ) ) -> a) -> Scene compData msg -> List a
 mapEntitiesWithComponents f (Scene scene) =
@@ -191,24 +169,6 @@ addComponents parent compDatas scene =
             addComponent parent d (addComponents parent ds scene)
 
 
-{-| Given a filter function and a list of Components, return compData that passes filter
--}
-getComponentsOfType : (compData -> Bool) -> List (Component compData) -> List compData
-getComponentsOfType filter comps =
-    let
-        getCompData : Component compData -> Maybe compData
-        getCompData (Component c) =
-            if filter c.data then
-                Just c.data
-
-            else
-                Nothing
-    in
-    List.filterMap
-        getCompData
-        comps
-
-
 {-| Update all components with a given function
 -}
 updateComponents : (compData -> compData) -> Scene compData msg -> Scene compData msg
@@ -221,7 +181,7 @@ updateComponents f (Scene scene) =
     Scene { scene | components = List.map (updateCompData f) scene.components }
 
 
-{-| Update a single component with EcsId with a given function
+{-| Update a single component with a given function
 -}
 updateComponent : EcsId -> (compData -> compData) -> Scene compData msg -> Scene compData msg
 updateComponent compId f (Scene scene) =
