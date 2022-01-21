@@ -1,22 +1,20 @@
-module ComponentData exposing (ComponentData, getStat, noCompData, statCompData, updateStat)
+module ComponentData exposing (ComponentData, getSkill, getStat, skillCompData, statCompData, updateSkill, updateStat)
 
+import Components.Skill exposing (Skill)
 import Components.Stat exposing (Stat)
 
 
 type ComponentData
     = StatData Stat
-    | NoData
-
-
-noCompData : ComponentData
-noCompData =
-    NoData
+    | SkillData Skill
 
 
 
 ---- STAT ----
 
 
+{-| Contruct new StatData with provided stat
+-}
 statCompData : Stat -> ComponentData
 statCompData stat =
     StatData stat
@@ -41,6 +39,41 @@ updateStat f cd =
     case cd of
         StatData s ->
             StatData (f s)
+
+        _ ->
+            cd
+
+
+
+---- SKILL ----
+
+
+{-| Contruct new SkillData with provided skill
+-}
+skillCompData : Skill -> ComponentData
+skillCompData skill =
+    SkillData skill
+
+
+{-| If given ComponentData is a skill, return skill
+-}
+getSkill : ComponentData -> Maybe Skill
+getSkill cd =
+    case cd of
+        SkillData s ->
+            Just s
+
+        _ ->
+            Nothing
+
+
+{-| If given ComponentData is a skill, apply f to it and return
+-}
+updateSkill : (Skill -> Skill) -> ComponentData -> ComponentData
+updateSkill f cd =
+    case cd of
+        SkillData s ->
+            SkillData (f s)
 
         _ ->
             cd

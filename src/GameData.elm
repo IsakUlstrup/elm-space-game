@@ -1,7 +1,7 @@
 module GameData exposing (GameMsg(..), GameScene, GameSystem)
 
 import ComponentData exposing (ComponentData)
-import Ecs
+import Ecs exposing (EcsId)
 
 
 type alias GameSystem =
@@ -13,4 +13,5 @@ type alias GameScene =
 
 
 type GameMsg
-    = Tick Float
+    = GameTick Float
+    | UseSkill EcsId

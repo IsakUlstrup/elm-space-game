@@ -1,6 +1,8 @@
 module Components exposing (..)
 
-import ComponentData exposing (getStat, noCompData, statCompData)
+import ComponentData exposing (getSkill, getStat, skillCompData, statCompData, updateSkill)
+import Components.Meter exposing (newMeter)
+import Components.Skill exposing (newSkill, reduceCooldown, resetCooldown)
 import Components.Stat exposing (StatType(..), getSumStats, hullStat, powerStat, reduceStatValue, shieldStat, statAdd, statEq)
 import Expect
 import Test exposing (..)
@@ -9,7 +11,7 @@ import Test exposing (..)
 compData : Test
 compData =
     describe "ComponentData tests"
-        [ test "Get stat from componentData thats's a StatData variant" <|
+        [ test "Get stat from ComponentData thats's a StatData variant, should return stat" <|
             \_ ->
                 getStat (statCompData (powerStat 0))
                     |> Expect.equal
@@ -19,11 +21,47 @@ compData =
                             , statType = Power
                             }
                         )
-        , test "Get stat from componentData that's not a StatData variant" <|
+        , test "Get skill from ComponentData thats's a SkillData variant, should return skill" <|
             \_ ->
-                getStat noCompData
+                getSkill (skillCompData (newSkill 0 "" ""))
+                    |> Expect.equal
+                        (Just
+                            { cooldown = newMeter 0 0
+                            , name = "Unnamed Skill"
+                            , description = "Skill description"
+                            }
+                        )
+        , test "Get stat from ComponentData thats's a SkillData variant, should return nothing" <|
+            \_ ->
+                getStat (skillCompData (newSkill 0 "" ""))
                     |> Expect.equal
                         Nothing
+        , test "Update SkillData, should return SkillData skill with cooldown 0" <|
+            \_ ->
+                updateSkill resetCooldown (skillCompData (newSkill 100 "" ""))
+                    |> Expect.equal
+                        (skillCompData
+                            { cooldown = newMeter 100 100
+                            , name = "Unnamed Skill"
+                            , description = "Skill description"
+                            }
+                        )
+        , test "Attempt SkillData update on Statdata, should return unchanged StatData" <|
+            \_ ->
+                updateSkill resetCooldown
+                    (statCompData
+                        { value = 0
+                        , cap = 0
+                        , statType = Power
+                        }
+                    )
+                    |> Expect.equal
+                        (statCompData
+                            { value = 0
+                            , cap = 0
+                            , statType = Power
+                            }
+                        )
         ]
 
 
@@ -173,4 +211,105 @@ stat =
                         , cap = 5
                         , statType = Power
                         }
+        ]
+
+
+skill : Test
+skill =
+    describe "Skill tests"
+        [ test "Create a new skill with positive cooldown" <|
+            \_ ->
+                newSkill 1000 "Skill" "A skill"
+                    |> Expect.equal
+                        { cooldown = newMeter 0 1000
+                        , name = "Skill"
+                        , description = "A skill"
+                        }
+        , test "Create a new skill with invalid negative cooldown, should return a skill with 0 cooldown" <|
+            \_ ->
+                newSkill -1000 "Skill" "A skill"
+                    |> Expect.equal
+                        { cooldown = newMeter 0 0
+                        , name = "Skill"
+                        , description = "A skill"
+                        }
+        , test "Create a new skill with empty name, should return skill with default name" <|
+            \_ ->
+                newSkill 1000 "" "A skill"
+                    |> Expect.equal
+                        { cooldown = newMeter 0 1000
+                        , name = "Unnamed Skill"
+                        , description = "A skill"
+                        }
+        , test "Create a new skill with empty description, shoild return a skill with default description" <|
+            \_ ->
+                newSkill 1000 "Skill" ""
+                    |> Expect.equal
+                        { cooldown = newMeter 0 1000
+                        , name = "Skill"
+                        , description = "Skill description"
+                        }
+        , test "Reset skill cooldown to max" <|
+            \_ ->
+                resetCooldown (newSkill 1000 "Skill" "A skill")
+                    |> Expect.equal
+                        { cooldown = newMeter 1000 1000
+                        , name = "Skill"
+                        , description = "A skill"
+                        }
+        , test "Reduce skill cooldown on a skill at max cooldown by 100" <|
+            \_ ->
+                reduceCooldown 100 (newSkill 1000 "Skill" "A skill" |> resetCooldown)
+                    |> Expect.equal
+                        { cooldown = newMeter 900 1000
+                        , name = "Skill"
+                        , description = "A skill"
+                        }
+        , test "Reduce skill cooldown on a skill at max cooldown by a negative number -100, should default to 0" <|
+            \_ ->
+                reduceCooldown -100 (newSkill 1000 "Skill" "A skill" |> resetCooldown)
+                    |> Expect.equal
+                        { cooldown = newMeter 1000 1000
+                        , name = "Skill"
+                        , description = "A skill"
+                        }
+        , test "Reduce skill cooldown on a skill where remaining cooldown is greater than cooldown time, should clamp cooldownLeft within 0 to cooldownTime " <|
+            \_ ->
+                reduceCooldown 100
+                    { cooldown = newMeter 2000 1000
+                    , name = "Skill"
+                    , description = "A skill"
+                    }
+                    |> Expect.equal
+                        { cooldown = newMeter 900 1000
+                        , name = "Skill"
+                        , description = "A skill"
+                        }
+        , test "Reduce skill cooldown on a skill by a huge number that would put cooldown at a negative number, cooldown should be clamped to minumun 0" <|
+            \_ ->
+                reduceCooldown 10000 (newSkill 1000 "Skill" "A skill" |> resetCooldown)
+                    |> Expect.equal
+                        { cooldown = newMeter 0 1000
+                        , name = "Skill"
+                        , description = "A skill"
+                        }
+        , test "Check if a skill with cooldown remaining = 0 is ready to use, should be true" <|
+            \_ ->
+                Components.Skill.isReady (reduceCooldown 10000 (newSkill 1000 "Skill" "A skill" |> resetCooldown))
+                    |> Expect.equal
+                        True
+        , test "Check if a skill with cooldown remaining > 0 is ready to use, should be false" <|
+            \_ ->
+                Components.Skill.isReady (reduceCooldown 100 (newSkill 1000 "Skill" "A skill" |> resetCooldown))
+                    |> Expect.equal
+                        False
+        , test "Check if a skill with negative remaining cooldown is ready to use, should be true" <|
+            \_ ->
+                Components.Skill.isReady
+                    { cooldown = newMeter -100 1000
+                    , name = "Skill"
+                    , description = "A skill"
+                    }
+                    |> Expect.equal
+                        True
         ]

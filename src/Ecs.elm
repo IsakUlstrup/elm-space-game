@@ -1,5 +1,6 @@
 module Ecs exposing
-    ( Entity
+    ( EcsId
+    , Entity
     , Scene
     , System
     , addEntity
@@ -7,7 +8,10 @@ module Ecs exposing
     , emptyScene
     , getComponentsOfType
     , getEntitiesWithComponents
+    , mapEntitiesWithComponents
     , runSystems
+    , updateComponent
+    , updateComponents
     )
 
 import Random
@@ -15,7 +19,7 @@ import Random
 
 {-| Id alias for Entity/Component ids
 -}
-type alias Id =
+type alias EcsId =
     Int
 
 
@@ -26,7 +30,7 @@ This type is not exposed to avoid mixing up Component and compData
 -}
 type Component compData
     = Component
-        { id : Id
+        { id : EcsId
         , parent : Entity
         , data : compData
         }
@@ -35,7 +39,7 @@ type Component compData
 {-| Entity is just an id used to associate entities and components
 -}
 type Entity
-    = Entity Id
+    = Entity EcsId
 
 
 {-| A system is a function that transforms the scene when given a message
@@ -53,7 +57,7 @@ type Scene compData msg
         , components : List (Component compData)
         , systems : List (System compData msg)
         , seed : Random.Seed
-        , idCounter : Id
+        , idCounter : EcsId
         }
 
 
@@ -112,6 +116,28 @@ getEntitiesWithComponents (Scene scene) =
         scene.entities
 
 
+{-| Map entities given a function that takes an entity and a list of id component tuples
+-}
+mapEntitiesWithComponents : (( Entity, List ( EcsId, compData ) ) -> a) -> Scene compData msg -> List a
+mapEntitiesWithComponents f (Scene scene) =
+    let
+        compData : Entity -> Component compData -> Maybe ( EcsId, compData )
+        compData e (Component c) =
+            if c.parent == e then
+                Just ( c.id, c.data )
+
+            else
+                Nothing
+
+        entityWithComponents e =
+            ( e, List.filterMap (compData e) scene.components )
+    in
+    List.map
+        entityWithComponents
+        scene.entities
+        |> List.map f
+
+
 
 ---- COMPONENT ----
 
@@ -155,6 +181,34 @@ getComponentsOfType filter comps =
     List.filterMap
         getCompData
         comps
+
+
+{-| Update all components with a given function
+-}
+updateComponents : (compData -> compData) -> Scene compData msg -> Scene compData msg
+updateComponents f (Scene scene) =
+    let
+        updateCompData : (compData -> compData) -> Component compData -> Component compData
+        updateCompData func (Component c) =
+            Component { c | data = func c.data }
+    in
+    Scene { scene | components = List.map (updateCompData f) scene.components }
+
+
+{-| Update a single component with EcsId with a given function
+-}
+updateComponent : EcsId -> (compData -> compData) -> Scene compData msg -> Scene compData msg
+updateComponent compId f (Scene scene) =
+    let
+        updateCompData : EcsId -> (compData -> compData) -> Component compData -> Component compData
+        updateCompData i func (Component c) =
+            if i == c.id then
+                Component { c | data = func c.data }
+
+            else
+                Component c
+    in
+    Scene { scene | components = List.map (updateCompData compId f) scene.components }
 
 
 

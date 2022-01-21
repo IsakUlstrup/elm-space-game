@@ -1,16 +1,20 @@
 module Main exposing (..)
 
 import Browser
-import ComponentData exposing (statCompData)
+import Browser.Events
+import ComponentData exposing (skillCompData, statCompData)
+import Components.Skill
 import Components.Stat
 import Ecs
-import GameData exposing (GameScene)
+import GameData exposing (GameMsg, GameScene)
 import Html exposing (Html, div)
+import Systems.SkillSystem exposing (skillSystem)
 import View
 
 
 type Msg
-    = NoOp
+    = Tick Float
+    | GameMsg GameMsg
 
 
 
@@ -28,14 +32,18 @@ init =
             [ statCompData (Components.Stat.powerStat 3)
             , statCompData (Components.Stat.hullStat 3)
             , statCompData (Components.Stat.powerStat 3 |> Components.Stat.reduceStatValue 2)
+            , skillCompData (Components.Skill.newSkill 5000 "Super skill" "The best skill" |> Components.Skill.resetCooldown)
             ]
         |> Ecs.addEntity [ statCompData (Components.Stat.shieldStat 15 |> Components.Stat.reduceStatValue 8) ]
         |> Ecs.addEntity [ statCompData (Components.Stat.hullStat 30) ]
-        |> Ecs.addEntity []
+        |> Ecs.addEntity [ skillCompData (Components.Skill.newSkill 5000 "Super skill" "The best skill") ]
         |> Ecs.addEntity
             [ statCompData (Components.Stat.hullStat 3)
             , statCompData (Components.Stat.powerStat 3)
             ]
+        |> Ecs.addEntity []
+        |> Ecs.addEntity []
+        |> Ecs.addSystem skillSystem
     , Cmd.none
     )
 
@@ -45,8 +53,13 @@ init =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update _ model =
-    ( model, Cmd.none )
+update msg model =
+    case msg of
+        Tick dt ->
+            ( model |> Ecs.runSystems (GameData.GameTick dt), Cmd.none )
+
+        GameMsg gameMsg ->
+            ( model |> Ecs.runSystems gameMsg, Cmd.none )
 
 
 
@@ -56,7 +69,7 @@ update _ model =
 view : Model -> Html Msg
 view model =
     div []
-        [ View.viewScene model
+        [ Html.map GameMsg (View.viewScene model)
         ]
 
 
@@ -66,7 +79,7 @@ view model =
 
 subs : Model -> Sub Msg
 subs _ =
-    Sub.none
+    Browser.Events.onAnimationFrameDelta Tick
 
 
 
