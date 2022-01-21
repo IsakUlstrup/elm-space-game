@@ -154,39 +154,43 @@ stat =
                 getSumStats
                     [ shieldStat 5, hullStat 1, hullStat 1, powerStat 5 ]
                     |> Expect.equal
-                        [ { value = 5
-                          , cap = 5
-                          , statType = Shield
-                          }
-                        , { value = 2
-                          , cap = 2
-                          , statType = Hull
-                          }
-                        , { value = 5
-                          , cap = 5
-                          , statType = Power
-                          }
-                        ]
+                        (Just
+                            [ { value = 5
+                              , cap = 5
+                              , statType = Shield
+                              }
+                            , { value = 2
+                              , cap = 2
+                              , statType = Hull
+                              }
+                            , { value = 5
+                              , cap = 5
+                              , statType = Power
+                              }
+                            ]
+                        )
         , test "Get sum of all stats present in a list of some, but not all stats" <|
             \_ ->
                 getSumStats
                     [ hullStat 1, hullStat 1, powerStat 5, hullStat 5 ]
                     |> Expect.equal
-                        [ { value = 7
-                          , cap = 7
-                          , statType = Hull
-                          }
-                        , { value = 5
-                          , cap = 5
-                          , statType = Power
-                          }
-                        ]
-        , test "Get sum of all stats present in an empty list" <|
+                        (Just
+                            [ { value = 7
+                              , cap = 7
+                              , statType = Hull
+                              }
+                            , { value = 5
+                              , cap = 5
+                              , statType = Power
+                              }
+                            ]
+                        )
+        , test "Get sum of all stats present in an empty list, should be Nothing" <|
             \_ ->
                 getSumStats
                     []
                     |> Expect.equal
-                        []
+                        Nothing
         , test "Reduce the value of a 5 value power stat by 2" <|
             \_ ->
                 reduceStatValue 2 (powerStat 5)

@@ -137,8 +137,8 @@ getSumStat targetStat stats =
         [] ->
             Nothing
 
-        powerStats ->
-            Just (List.foldl statAdd targetStat powerStats)
+        matchingStats ->
+            Just (List.foldl statAdd targetStat matchingStats)
 
 
 {-| Given a list of stats, return the sum of all power stats if any
@@ -164,6 +164,11 @@ getSumShield stats =
 
 {-| Given a list of stats, sum them together and return a list of summed stats
 -}
-getSumStats : List Stat -> List Stat
+getSumStats : List Stat -> Maybe (List Stat)
 getSumStats stats =
-    List.filterMap identity [ getSumShield stats, getSumHull stats, getSumPower stats ]
+    case List.filterMap identity [ getSumShield stats, getSumHull stats, getSumPower stats ] of
+        [] ->
+            Nothing
+
+        sumStats ->
+            Just sumStats

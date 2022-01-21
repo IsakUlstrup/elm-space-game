@@ -69,23 +69,18 @@ viewEntity ( _, components ) =
             Nothing
 
         ( stats, [] ) ->
-            case Components.Stat.getSumStats stats of
-                [] ->
-                    Nothing
-
-                s ->
-                    Just (div [ class "entity" ] (h2 [] [ text "Entity" ] :: List.concatMap viewStat s))
+            Components.Stat.getSumStats stats
+                |> Maybe.andThen (\ss -> Just (div [ class "entity" ] (h2 [] [ text "Entity" ] :: List.concatMap viewStat ss)))
 
         ( [], skills ) ->
             Just (div [ class "entity" ] (h2 [] [ text "Entity" ] :: List.concatMap viewSkill skills))
 
         ( stats, skills ) ->
-            case Components.Stat.getSumStats stats of
-                [] ->
-                    Nothing
-
-                s ->
-                    Just (div [ class "entity" ] (h2 [] [ text "Entity" ] :: List.concatMap viewStat s ++ List.concatMap viewSkill skills))
+            Components.Stat.getSumStats stats
+                |> Maybe.andThen
+                    (\ss ->
+                        Just (div [ class "entity" ] (h2 [] [ text "Entity" ] :: List.concatMap viewStat ss ++ List.concatMap viewSkill skills))
+                    )
 
 
 viewScene : GameScene -> Html GameMsg
