@@ -8,6 +8,7 @@ module Ecs exposing
     , emptyScene
     , getComponentsOfType
     , getEntitiesWithComponents
+    , idToInt
     , mapEntitiesWithComponents
     , runSystems
     , updateComponent
@@ -19,8 +20,8 @@ import Random
 
 {-| Id alias for Entity/Component ids
 -}
-type alias EcsId =
-    Int
+type EcsId
+    = EcsId Int
 
 
 {-| Component, compData is the type stored in each component, usually a union type
@@ -62,6 +63,24 @@ type Scene compData msg
 
 
 
+---- ECS ID ----
+
+
+{-| increment id by 1
+-}
+newId : EcsId -> EcsId
+newId (EcsId i) =
+    EcsId (i + 1)
+
+
+{-| id to int, for rendering
+-}
+idToInt : EcsId -> Int
+idToInt (EcsId id) =
+    id
+
+
+
 ---- SCENE ----
 
 
@@ -74,8 +93,15 @@ emptyScene seedInit =
         , components = []
         , systems = []
         , seed = Random.initialSeed seedInit
-        , idCounter = 0
+        , idCounter = EcsId 0
         }
+
+
+{-| Increment idCounter by 1
+-}
+incId : Scene compData msg -> Scene compData msg
+incId (Scene scene) =
+    Scene { scene | idCounter = newId scene.idCounter }
 
 
 
@@ -91,8 +117,8 @@ addEntity components (Scene scene) =
     Scene
         { scene
             | entities = entity :: scene.entities
-            , idCounter = scene.idCounter + 1
         }
+        |> incId
         |> addComponents entity components
 
 
@@ -149,8 +175,8 @@ addComponent parent compData (Scene scene) =
     Scene
         { scene
             | components = Component { id = scene.idCounter, parent = parent, data = compData } :: scene.components
-            , idCounter = scene.idCounter + 1
         }
+        |> incId
 
 
 {-| Add list of component data with parent as parent

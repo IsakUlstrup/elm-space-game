@@ -52,7 +52,7 @@ viewSkill : ( EcsId, Skill ) -> List (Html GameMsg)
 viewSkill ( compId, skill ) =
     [ h3 [] [ text skill.name ]
     , p [] [ text skill.description ]
-    , p [] [ text "id: ", text (String.fromInt compId) ]
+    , p [] [ text "id: ", text (String.fromInt (Ecs.idToInt compId)) ]
     , viewMeter skill.cooldown
     , button [ Html.Events.onClick (UseSkill compId), HtmlAttr.disabled (isEmpty skill.cooldown |> not) ] [ text "Use skill" ]
     ]
