@@ -1,6 +1,7 @@
 module Components exposing (..)
 
 import ComponentData exposing (getSkill, getStat, skillCompData, statCompData, updateSkill)
+import Components.Color
 import Components.Meter exposing (newMeter)
 import Components.Skill exposing (newSkill, reduceCooldown, resetCooldown)
 import Components.Stat exposing (StatType(..), getSumStats, hullStat, powerStat, reduceStatValue, shieldStat, statAdd, statEq)
@@ -316,4 +317,76 @@ skill =
                     }
                     |> Expect.equal
                         True
+        ]
+
+
+testColor : Components.Color.Color
+testColor =
+    Components.Color.initColor
+
+
+color : Test
+color =
+    describe "Color tests"
+        [ test "Create a new color with default values" <|
+            \_ ->
+                testColor
+                    |> Expect.equal
+                        { hue = newMeter 0 360
+                        , saturation = newMeter 100 100
+                        , lightness = newMeter 50 100
+                        }
+        , test "Set hue of init color to 120 (green)" <|
+            \_ ->
+                Components.Color.withHue 120 testColor
+                    |> Expect.equal
+                        { hue = newMeter 120 360
+                        , saturation = testColor.saturation
+                        , lightness = testColor.lightness
+                        }
+        , test "Set hue of init color to 400, which is above max (360), should wrap around to 40" <|
+            \_ ->
+                Components.Color.withHue 400 testColor
+                    |> Expect.equal
+                        { hue = newMeter 40 360
+                        , saturation = testColor.saturation
+                        , lightness = testColor.lightness
+                        }
+        , test "Set saturation of init color to 50" <|
+            \_ ->
+                Components.Color.withSaturation 50 testColor
+                    |> Expect.equal
+                        { hue = testColor.hue
+                        , saturation = newMeter 50 100
+                        , lightness = testColor.lightness
+                        }
+        , test "Set saturation of init color to -50, should be clamped to 0" <|
+            \_ ->
+                Components.Color.withSaturation -50 testColor
+                    |> Expect.equal
+                        { hue = testColor.hue
+                        , saturation = newMeter 0 100
+                        , lightness = testColor.lightness
+                        }
+        , test "Set lightness of init color to 0" <|
+            \_ ->
+                Components.Color.withLightness 0 testColor
+                    |> Expect.equal
+                        { hue = testColor.hue
+                        , saturation = testColor.saturation
+                        , lightness = newMeter 0 100
+                        }
+        , test "Set lightness of init color to 1000, should be clamped to 100" <|
+            \_ ->
+                Components.Color.withLightness 1000 testColor
+                    |> Expect.equal
+                        { hue = testColor.hue
+                        , saturation = testColor.saturation
+                        , lightness = newMeter 100 100
+                        }
+        , test "Get CSS string representation of init color" <|
+            \_ ->
+                Components.Color.toCssString testColor
+                    |> Expect.equal
+                        "hsl(0, 100%, 50%)"
         ]

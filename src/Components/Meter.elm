@@ -1,11 +1,14 @@
 module Components.Meter exposing
     ( Meter
     , add
+    , getValue
     , isEmpty
     , isFull
     , newMeter
     , setEmpty
     , setFull
+    , setValue
+    , setValueWrap
     , subtract
     , viewHelperFloat
     , viewHelperInt
@@ -44,6 +47,42 @@ newMeter curr cap =
 setValue : number -> Meter number -> Meter number
 setValue val (Meter meter) =
     Meter { meter | value = clamp 0 meter.cap val }
+
+
+{-| Like clamp, but will "wrap" value around from low if above high.
+
+Example: clampWrap 0 100 110 returns 10
+
+-}
+clampWrap : number -> number -> number -> number
+clampWrap low high number =
+    if number > high then
+        clampWrap low high (number - high)
+
+    else if number < low then
+        clampWrap low high (number + high)
+
+    else
+        number
+
+
+{-|
+
+    Set meter value, but "wrap" value around if it's above cap
+
+    Example: newMeter 0 100 |> setValueWrap 110 = Meter 10 100
+
+-}
+setValueWrap : number -> Meter number -> Meter number
+setValueWrap val (Meter meter) =
+    Meter { meter | value = clampWrap 0 meter.cap val }
+
+
+{-| Get meter value
+-}
+getValue : Meter number -> number
+getValue (Meter meter) =
+    meter.value
 
 
 {-| Add amount to meter value
