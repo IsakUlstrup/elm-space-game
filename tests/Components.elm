@@ -3,7 +3,7 @@ module Components exposing (..)
 import ComponentData exposing (getSkill, getStat, skillCompData, statCompData, updateSkill)
 import Components.Color
 import Components.Meter exposing (newMeter)
-import Components.Skill exposing (newSkill, reduceCooldown, resetCooldown)
+import Components.Skill exposing (Skill, newSkill, reduceCooldown, resetCooldown)
 import Components.Stat exposing (StatType(..), getSumStats, hullStat, powerStat, reduceStatValue, shieldStat, statAdd, statEq)
 import Expect
 import Test exposing (..)
@@ -221,6 +221,15 @@ stat =
         ]
 
 
+testSkill : Skill Int
+testSkill =
+    { cooldown = newMeter 0 1000
+    , name = "Skill"
+    , description = "A skill"
+    , target = Nothing
+    }
+
+
 skill : Test
 skill =
     describe "Skill tests"
@@ -310,9 +319,9 @@ skill =
                         , description = "A skill"
                         , target = Nothing
                         }
-        , test "Check if a skill with cooldown remaining = 0 is ready to use, should be true" <|
+        , test "Check if a skill with cooldown remaining = 0 and target set is ready to use, should be true" <|
             \_ ->
-                Components.Skill.isReady (reduceCooldown 10000 (newSkill 1000 "Skill" "A skill" |> resetCooldown))
+                Components.Skill.isReady (reduceCooldown 10000 (testSkill |> Components.Skill.setTarget 1))
                     |> Expect.equal
                         True
         , test "Check if a skill with cooldown remaining > 0 is ready to use, should be false" <|
@@ -320,16 +329,40 @@ skill =
                 Components.Skill.isReady (reduceCooldown 100 (newSkill 1000 "Skill" "A skill" |> resetCooldown))
                     |> Expect.equal
                         False
-        , test "Check if a skill with negative remaining cooldown is ready to use, should be true" <|
+        , test "Check if a skill with negative remaining cooldown and target set is ready to use, should be true" <|
             \_ ->
                 Components.Skill.isReady
                     { cooldown = newMeter -100 1000
                     , name = "Skill"
                     , description = "A skill"
-                    , target = Nothing
+                    , target = Just 1
                     }
                     |> Expect.equal
                         True
+        , test "Skill is off cooldown, but has no target, should not be rady" <|
+            \_ ->
+                Components.Skill.isReady
+                    { cooldown = newMeter 0 1000
+                    , name = "Skill"
+                    , description = "A skill"
+                    , target = Nothing
+                    }
+                    |> Expect.equal
+                        False
+        , test "Set new target equal to old, should untarget" <|
+            \_ ->
+                { cooldown = newMeter 0 1000
+                , name = "Skill"
+                , description = "A skill"
+                , target = Just 1
+                }
+                    |> Components.Skill.setTarget 1
+                    |> Expect.equal
+                        { cooldown = newMeter 0 1000
+                        , name = "Skill"
+                        , description = "A skill"
+                        , target = Nothing
+                        }
         ]
 
 

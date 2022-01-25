@@ -1,4 +1,4 @@
-module Components.Skill exposing (Skill, isReady, newSkill, reduceCooldown, resetCooldown)
+module Components.Skill exposing (Skill, isReady, newSkill, reduceCooldown, resetCooldown, setTarget, unsetTarget)
 
 import Components.Meter exposing (Meter, isEmpty, newMeter, setFull, subtract)
 
@@ -24,12 +24,11 @@ newSkill : Float -> String -> String -> Skill t
 newSkill cooldown name description =
     let
         defaultString n d =
-            case n of
-                "" ->
-                    d
+            if String.isEmpty n then
+                d
 
-                sn ->
-                    sn
+            else
+                n
     in
     Skill
         (newMeter 0 cooldown)
@@ -55,8 +54,43 @@ reduceCooldown amount skill =
     { skill | cooldown = subtract amount skill.cooldown }
 
 
+{-| Set skill target.
+
+Will untarget if target is equal to existing target
+
+-}
+setTarget : t -> Skill t -> Skill t
+setTarget target skill =
+    case skill.target of
+        Just trgt ->
+            if trgt == target then
+                unsetTarget skill
+
+            else
+                { skill | target = Just target }
+
+        Nothing ->
+            { skill | target = Just target }
+
+
+{-| Set skill target to nothing
+-}
+unsetTarget : Skill t -> Skill t
+unsetTarget skill =
+    { skill | target = Nothing }
+
+
 {-| Is skill ready to use predicate
 -}
 isReady : Skill t -> Bool
 isReady skill =
-    isEmpty skill.cooldown
+    let
+        hasTarget s =
+            case s.target of
+                Just _ ->
+                    True
+
+                Nothing ->
+                    False
+    in
+    isEmpty skill.cooldown && hasTarget skill

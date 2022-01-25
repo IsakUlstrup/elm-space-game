@@ -2,7 +2,7 @@ module View exposing (..)
 
 import ComponentData
 import Components.Color
-import Components.Meter exposing (Meter, isEmpty)
+import Components.Meter exposing (Meter)
 import Components.Skill exposing (Skill)
 import Components.Stat exposing (Stat, StatType(..))
 import Ecs exposing (EcsId, Entity)
@@ -51,22 +51,30 @@ viewMeter m =
 
 viewSkill : ( EcsId, Skill Ecs.Entity ) -> List (Html GameMsg)
 viewSkill ( compId, skill ) =
-    [ h3 [] [ text skill.name ]
-    , p [] [ text skill.description ]
-    , p [] [ text "id: ", text (String.fromInt (Ecs.idToInt compId)) ]
-    , viewMeter skill.cooldown
-    , button [ Html.Events.onClick (UseSkill compId), HtmlAttr.disabled (isEmpty skill.cooldown |> not) ] [ text "Use skill" ]
+    [ button
+        [ Html.Events.onClick (UseSkill compId)
+        , HtmlAttr.disabled (Components.Skill.isReady skill |> not)
+        ]
+        [ h3 [] [ text skill.name ]
+        , p [] [ text skill.description ]
+        , p [] [ text "id: ", text (String.fromInt (Ecs.idToInt compId)) ]
+        , p [] [ text (Debug.toString skill.target) ]
+        , viewMeter skill.cooldown
+        ]
     ]
 
 
 viewEntity : ( Entity, List ( EcsId, ComponentData.ComponentData ) ) -> Maybe (Html GameMsg)
-viewEntity ( _, components ) =
+viewEntity ( entity, components ) =
     let
         color =
             List.filterMap ComponentData.getColor (List.map Tuple.second components)
                 |> List.head
                 |> Maybe.withDefault (Components.Color.initColor |> Components.Color.withLightness 0)
                 |> Components.Color.toCssString
+
+        clickTargetEvent e =
+            Html.Events.onClick (SetSkillTarget e)
     in
     case
         ( List.filterMap ComponentData.getStat (List.map Tuple.second components)
@@ -78,20 +86,19 @@ viewEntity ( _, components ) =
 
         ( stats, [] ) ->
             Components.Stat.getSumStats stats
-                |> Maybe.andThen (\ss -> Just (div [ class "entity" ] (h2 [ HtmlAttr.style "color" color ] [ text "Entity" ] :: List.concatMap viewStat ss)))
+                |> Maybe.andThen (\ss -> Just (div [ class "entity", clickTargetEvent entity ] (h2 [ HtmlAttr.style "color" color ] [ text "Entity" ] :: List.concatMap viewStat ss)))
 
         ( [], skills ) ->
-            Just (div [ class "entity" ] (h2 [ HtmlAttr.style "color" color ] [ text "Entity" ] :: List.concatMap viewSkill skills))
+            Just (div [ class "entity", clickTargetEvent entity ] (h2 [ HtmlAttr.style "color" color ] [ text "Entity" ] :: List.concatMap viewSkill skills))
 
         ( stats, skills ) ->
             Components.Stat.getSumStats stats
                 |> Maybe.andThen
                     (\ss ->
-                        Just (div [ class "entity" ] (h2 [ HtmlAttr.style "color" color ] [ text "Entity" ] :: List.concatMap viewStat ss ++ List.concatMap viewSkill skills))
+                        Just (div [ class "entity", clickTargetEvent entity ] (h2 [ HtmlAttr.style "color" color ] [ text "Entity" ] :: List.concatMap viewStat ss ++ List.concatMap viewSkill skills))
                     )
 
 
 viewScene : GameScene -> Html GameMsg
 viewScene scene =
-    -- div [] [ viewPlayers (Ecs.getEntitiesWithComponents scene) ]
     div [] (List.filterMap identity (Ecs.mapEntitiesWithComponents viewEntity scene))

@@ -1,23 +1,9 @@
 module Systems.SkillSystem exposing (skillSystem)
 
-import ComponentData exposing (ComponentData)
+import ComponentData
 import Components.Skill
 import Ecs
 import GameData exposing (GameMsg(..), GameScene)
-
-
-{-| Redue skill cooldown by amount
--}
-reduceSkillCooldown : Float -> ComponentData -> ComponentData
-reduceSkillCooldown amount comp =
-    ComponentData.updateSkill (Components.Skill.reduceCooldown amount) comp
-
-
-{-| Reset skill cooldown
--}
-resetSkillCooldown : ComponentData -> ComponentData
-resetSkillCooldown comp =
-    ComponentData.updateSkill Components.Skill.resetCooldown comp
 
 
 skillSystem : GameMsg -> GameScene -> GameScene
@@ -25,8 +11,12 @@ skillSystem msg scene =
     case msg of
         GameTick dt ->
             scene
-                |> Ecs.updateComponents (reduceSkillCooldown dt)
+                |> Ecs.updateComponents (ComponentData.updateSkill (Components.Skill.reduceCooldown dt))
 
         UseSkill skillId ->
             scene
-                |> Ecs.updateComponent skillId resetSkillCooldown
+                |> Ecs.updateComponent skillId (ComponentData.updateSkill Components.Skill.resetCooldown)
+
+        SetSkillTarget target ->
+            scene
+                |> Ecs.updateComponents (ComponentData.updateSkill (Components.Skill.setTarget target))
