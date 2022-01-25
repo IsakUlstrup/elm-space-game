@@ -2,13 +2,16 @@ module Main exposing (..)
 
 import Browser
 import Browser.Events
-import ComponentData exposing (colorCompData, skillCompData, statCompData)
+import ComponentData exposing (buffCompData, colorCompData, skillCompData, statCompData)
+import Components.Buff
 import Components.Color
+import Components.Meter exposing (newMeter)
 import Components.Skill
 import Components.Stat
 import Ecs
 import GameData exposing (GameMsg, GameScene)
 import Html exposing (Html, div)
+import Systems.BuffSystem exposing (buffSystem)
 import Systems.SkillSystem exposing (skillSystem)
 import View
 
@@ -42,15 +45,17 @@ init =
         |> Ecs.addEntity
             [ statCompData (Components.Stat.hullStat 3)
             , statCompData (Components.Stat.powerStat 3)
+            , buffCompData (Components.Buff.newBuff "Power buff" "" [ Components.Stat.powerStat 3 ] (Just (newMeter 10000 10000)))
             , colorCompData
                 (Components.Color.initColor
                     |> Components.Color.withHue 120
                     |> Components.Color.withLightness 40
                 )
             ]
-        |> Ecs.addEntity []
-        |> Ecs.addEntity []
+        |> Ecs.addEntity [ buffCompData (Components.Buff.newBuff "Power buff" "" [ Components.Stat.powerStat 3 ] (Just (newMeter 1000 1000))) ]
+        |> Ecs.addEntity [ buffCompData (Components.Buff.newBuff "Power buff" "" [ Components.Stat.powerStat 3 ] Nothing) ]
         |> Ecs.addSystem skillSystem
+        |> Ecs.addSystem buffSystem
     , Cmd.none
     )
 

@@ -1,16 +1,21 @@
 module ComponentData exposing
     ( ComponentData
+    , buffCompData
+    , buffPred
     , colorCompData
+    , getBuff
     , getColor
     , getSkill
     , getStat
     , skillCompData
     , statCompData
+    , updateBuff
     , updateColor
     , updateSkill
     , updateStat
     )
 
+import Components.Buff exposing (Buff)
 import Components.Color exposing (Color)
 import Components.Skill exposing (Skill)
 import Components.Stat exposing (Stat)
@@ -21,6 +26,7 @@ type ComponentData
     = StatData Stat
     | SkillData (Skill Ecs.Entity)
     | ColorData Color
+    | BuffData (Buff Stat)
 
 
 
@@ -126,3 +132,50 @@ updateColor f cd =
 
         _ ->
             cd
+
+
+
+---- BUFF ----
+
+
+{-| Contruct new BuffData with provided buff
+-}
+buffCompData : Buff Stat -> ComponentData
+buffCompData buff =
+    BuffData buff
+
+
+{-| If given ComponentData is a buff, return buff
+-}
+getBuff : ComponentData -> Maybe (Buff Stat)
+getBuff cd =
+    case cd of
+        BuffData b ->
+            Just b
+
+        _ ->
+            Nothing
+
+
+{-| If given ComponentData is a buff, apply f to it and return
+-}
+updateBuff : (Buff Stat -> Buff Stat) -> ComponentData -> ComponentData
+updateBuff f cd =
+    case cd of
+        BuffData b ->
+            BuffData (f b)
+
+        _ ->
+            cd
+
+
+{-| Buff predicate
+-}
+buffPred : (Buff Stat -> Bool) -> ComponentData -> Bool
+buffPred f cd =
+    case cd of
+        BuffData b ->
+            f b
+
+        _ ->
+            True

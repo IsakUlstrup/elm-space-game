@@ -1,13 +1,14 @@
 module View exposing (..)
 
 import ComponentData
+import Components.Buff exposing (Buff)
 import Components.Color
 import Components.Meter exposing (Meter)
 import Components.Skill exposing (Skill)
 import Components.Stat exposing (Stat, StatType(..))
 import Ecs exposing (EcsId, Entity)
 import GameData exposing (GameMsg(..), GameScene)
-import Html exposing (Html, button, div, h2, h3, meter, p, text)
+import Html exposing (Html, button, div, h2, h3, li, meter, p, text, ul)
 import Html.Attributes as HtmlAttr exposing (class)
 import Html.Events
 
@@ -64,6 +65,25 @@ viewSkill ( compId, skill ) =
     ]
 
 
+viewBuff : Buff Stat -> List (Html GameMsg)
+viewBuff buff =
+    let
+        viewDuration b =
+            case b.duration of
+                Just d ->
+                    viewMeter d
+
+                Nothing ->
+                    p [] [ text "Infinite" ]
+    in
+    [ h3 [] [ text "Buff: ", text buff.name ]
+    , p [] [ text buff.description ]
+    , p [] [ text "effects:" ]
+    , ul [] (List.map (\s -> li [] (viewStat s)) buff.effects)
+    , p [] [ text "duration: ", viewDuration buff ]
+    ]
+
+
 viewEntity : ( Entity, List ( EcsId, ComponentData.ComponentData ) ) -> Maybe (Html GameMsg)
 viewEntity ( entity, components ) =
     let
@@ -77,29 +97,30 @@ viewEntity ( entity, components ) =
             Html.Events.onClick (SetSkillTarget e)
 
         entityWrapper e cs =
-            div [ class "entity" ] (h2 [ HtmlAttr.style "color" color, clickTargetEvent e ] [ text (Debug.toString e) ] :: cs)
+            div [ class "entity" ]
+                (h2 [ HtmlAttr.style "color" color, clickTargetEvent e ] [ text (Debug.toString e) ] :: cs)
     in
     case
         ( List.filterMap ComponentData.getStat (List.map Tuple.second components)
         , List.filterMap (\( cid, comp ) -> ComponentData.getSkill comp |> Maybe.andThen (\s -> Just ( cid, s ))) components
+        , List.filterMap ComponentData.getBuff (List.map Tuple.second components)
         )
     of
-        ( [], [] ) ->
+        ( [], [], [] ) ->
             Nothing
 
-        ( stats, [] ) ->
-            Components.Stat.getSumStats stats
-                |> Maybe.andThen (\ss -> Just (entityWrapper entity (List.concatMap viewStat ss)))
-
-        ( [], skills ) ->
-            Just (entityWrapper entity (List.concatMap viewSkill skills))
-
-        ( stats, skills ) ->
-            Components.Stat.getSumStats stats
-                |> Maybe.andThen
-                    (\ss ->
-                        Just (entityWrapper entity (List.concatMap viewStat ss ++ List.concatMap viewSkill skills))
+        ( stats, skills, buffs ) ->
+            Just
+                (entityWrapper entity
+                    (List.concatMap viewSkill skills
+                        ++ h3 [] [ text "Stats" ]
+                        :: (Components.Stat.getSumStats (stats ++ List.concatMap (\b -> b.effects) buffs)
+                                |> Maybe.andThen (\ss -> Just (List.concatMap viewStat ss))
+                                |> Maybe.withDefault []
+                           )
+                        ++ List.concatMap viewBuff buffs
                     )
+                )
 
 
 viewScene : GameScene -> Html GameMsg

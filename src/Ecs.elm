@@ -6,6 +6,7 @@ module Ecs exposing
     , addEntity
     , addSystem
     , emptyScene
+    , filterComponents
     , idToInt
     , mapEntitiesWithComponents
     , runSystems
@@ -179,6 +180,18 @@ updateComponents f (Scene scene) =
             Component { c | data = func c.data }
     in
     Scene { scene | components = List.map (updateCompData f) scene.components }
+
+
+{-| Keep components that satisfy the test.
+-}
+filterComponents : (compData -> Bool) -> Scene compData msg -> Scene compData msg
+filterComponents pred (Scene scene) =
+    let
+        compDataPred : Component compData -> Bool
+        compDataPred (Component c) =
+            pred c.data
+    in
+    Scene { scene | components = List.filter compDataPred scene.components }
 
 
 {-| Update a single component with a given function

@@ -1,10 +1,11 @@
 module Components exposing (..)
 
 import ComponentData exposing (getSkill, getStat, skillCompData, statCompData, updateSkill)
+import Components.Buff exposing (Buff)
 import Components.Color
 import Components.Meter exposing (newMeter)
 import Components.Skill exposing (Skill, newSkill, reduceCooldown, resetCooldown)
-import Components.Stat exposing (StatType(..), getSumStats, hullStat, powerStat, reduceStatValue, shieldStat, statAdd, statEq)
+import Components.Stat exposing (Stat, StatType(..), getSumStats, hullStat, powerStat, reduceStatValue, shieldStat, statAdd, statEq)
 import Expect
 import Test exposing (..)
 
@@ -435,4 +436,61 @@ color =
                 Components.Color.toCssString testColor
                     |> Expect.equal
                         "hsl(0, 100%, 50%)"
+        ]
+
+
+testBuff : Buff Stat
+testBuff =
+    { name = "Buff"
+    , description = "A buff"
+    , effects = [ Components.Stat.powerStat 3 ]
+    , duration = Just (newMeter 1000 1000)
+    }
+
+
+testInfiniteBuff : Buff Stat
+testInfiniteBuff =
+    { name = "Buff"
+    , description = "A buff"
+    , effects = [ Components.Stat.powerStat 3 ]
+    , duration = Nothing
+    }
+
+
+buff : Test
+buff =
+    describe "Buff tests"
+        [ test "Reduce duration on infinite buff" <|
+            \_ ->
+                testInfiniteBuff
+                    |> Components.Buff.reduceDuration 16
+                    |> Expect.equal
+                        { name = "Buff"
+                        , description = "A buff"
+                        , effects = [ Components.Stat.powerStat 3 ]
+                        , duration = Nothing
+                        }
+        , test "Reduce duration on buff" <|
+            \_ ->
+                testBuff
+                    |> Components.Buff.reduceDuration 10
+                    |> Expect.equal
+                        { name = "Buff"
+                        , description = "A buff"
+                        , effects = [ Components.Stat.powerStat 3 ]
+                        , duration = Just (newMeter 990 1000)
+                        }
+        , test "Check if infinite buff is active" <|
+            \_ ->
+                testInfiniteBuff
+                    |> Components.Buff.isActive
+                    |> Expect.equal
+                        True
+        , test "Check if buff is active" <|
+            \_ ->
+                testBuff
+                    |> Components.Buff.reduceDuration 99999
+                    |> Components.Buff.isActive
+                    |> Expect.equal
+                        False
         ]
