@@ -2,7 +2,8 @@ module Main exposing (..)
 
 import Browser
 import Browser.Events
-import ComponentData exposing (skillCompData, statCompData)
+import ComponentData exposing (colorCompData, skillCompData, statCompData)
+import Components.Color
 import Components.Skill
 import Components.Stat
 import Ecs
@@ -33,6 +34,7 @@ init =
             , statCompData (Components.Stat.hullStat 3)
             , statCompData (Components.Stat.powerStat 3 |> Components.Stat.reduceStatValue 2)
             , skillCompData (Components.Skill.newSkill 5000 "Super skill" "The best skill" |> Components.Skill.resetCooldown)
+            , colorCompData Components.Color.initColor
             ]
         |> Ecs.addEntity [ statCompData (Components.Stat.shieldStat 15 |> Components.Stat.reduceStatValue 8) ]
         |> Ecs.addEntity [ statCompData (Components.Stat.hullStat 30) ]
@@ -40,6 +42,11 @@ init =
         |> Ecs.addEntity
             [ statCompData (Components.Stat.hullStat 3)
             , statCompData (Components.Stat.powerStat 3)
+            , colorCompData
+                (Components.Color.initColor
+                    |> Components.Color.withHue 120
+                    |> Components.Color.withLightness 40
+                )
             ]
         |> Ecs.addEntity []
         |> Ecs.addEntity []

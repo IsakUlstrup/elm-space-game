@@ -1,5 +1,17 @@
-module ComponentData exposing (ComponentData, getSkill, getStat, skillCompData, statCompData, updateSkill, updateStat)
+module ComponentData exposing
+    ( ComponentData
+    , colorCompData
+    , getColor
+    , getSkill
+    , getStat
+    , skillCompData
+    , statCompData
+    , updateColor
+    , updateSkill
+    , updateStat
+    )
 
+import Components.Color exposing (Color)
 import Components.Skill exposing (Skill)
 import Components.Stat exposing (Stat)
 
@@ -7,6 +19,7 @@ import Components.Stat exposing (Stat)
 type ComponentData
     = StatData Stat
     | SkillData Skill
+    | ColorData Color
 
 
 
@@ -74,6 +87,41 @@ updateSkill f cd =
     case cd of
         SkillData s ->
             SkillData (f s)
+
+        _ ->
+            cd
+
+
+
+---- COLOR ----
+
+
+{-| Contruct new ColorData with provided color
+-}
+colorCompData : Color -> ComponentData
+colorCompData color =
+    ColorData color
+
+
+{-| If given ComponentData is a color, return color
+-}
+getColor : ComponentData -> Maybe Color
+getColor cd =
+    case cd of
+        ColorData c ->
+            Just c
+
+        _ ->
+            Nothing
+
+
+{-| If given ComponentData is a color, apply f to it and return
+-}
+updateColor : (Color -> Color) -> ComponentData -> ComponentData
+updateColor f cd =
+    case cd of
+        ColorData c ->
+            ColorData (f c)
 
         _ ->
             cd

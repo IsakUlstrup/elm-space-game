@@ -1,6 +1,7 @@
 module View exposing (..)
 
 import ComponentData
+import Components.Color
 import Components.Meter exposing (Meter, isEmpty)
 import Components.Skill exposing (Skill)
 import Components.Stat exposing (Stat, StatType(..))
@@ -60,6 +61,13 @@ viewSkill ( compId, skill ) =
 
 viewEntity : ( Entity, List ( EcsId, ComponentData.ComponentData ) ) -> Maybe (Html GameMsg)
 viewEntity ( _, components ) =
+    let
+        color =
+            List.filterMap ComponentData.getColor (List.map Tuple.second components)
+                |> List.head
+                |> Maybe.withDefault (Components.Color.initColor |> Components.Color.withLightness 0)
+                |> Components.Color.toCssString
+    in
     case
         ( List.filterMap ComponentData.getStat (List.map Tuple.second components)
         , List.filterMap (\( cid, comp ) -> ComponentData.getSkill comp |> Maybe.andThen (\s -> Just ( cid, s ))) components
@@ -70,16 +78,16 @@ viewEntity ( _, components ) =
 
         ( stats, [] ) ->
             Components.Stat.getSumStats stats
-                |> Maybe.andThen (\ss -> Just (div [ class "entity" ] (h2 [] [ text "Entity" ] :: List.concatMap viewStat ss)))
+                |> Maybe.andThen (\ss -> Just (div [ class "entity" ] (h2 [ HtmlAttr.style "color" color ] [ text "Entity" ] :: List.concatMap viewStat ss)))
 
         ( [], skills ) ->
-            Just (div [ class "entity" ] (h2 [] [ text "Entity" ] :: List.concatMap viewSkill skills))
+            Just (div [ class "entity" ] (h2 [ HtmlAttr.style "color" color ] [ text "Entity" ] :: List.concatMap viewSkill skills))
 
         ( stats, skills ) ->
             Components.Stat.getSumStats stats
                 |> Maybe.andThen
                     (\ss ->
-                        Just (div [ class "entity" ] (h2 [] [ text "Entity" ] :: List.concatMap viewStat ss ++ List.concatMap viewSkill skills))
+                        Just (div [ class "entity" ] (h2 [ HtmlAttr.style "color" color ] [ text "Entity" ] :: List.concatMap viewStat ss ++ List.concatMap viewSkill skills))
                     )
 
 
