@@ -75,6 +75,9 @@ viewEntity ( entity, components ) =
 
         clickTargetEvent e =
             Html.Events.onClick (SetSkillTarget e)
+
+        entityWrapper e cs =
+            div [ class "entity" ] (h2 [ HtmlAttr.style "color" color, clickTargetEvent e ] [ text (Debug.toString e) ] :: cs)
     in
     case
         ( List.filterMap ComponentData.getStat (List.map Tuple.second components)
@@ -86,16 +89,16 @@ viewEntity ( entity, components ) =
 
         ( stats, [] ) ->
             Components.Stat.getSumStats stats
-                |> Maybe.andThen (\ss -> Just (div [ class "entity", clickTargetEvent entity ] (h2 [ HtmlAttr.style "color" color ] [ text "Entity" ] :: List.concatMap viewStat ss)))
+                |> Maybe.andThen (\ss -> Just (entityWrapper entity (List.concatMap viewStat ss)))
 
         ( [], skills ) ->
-            Just (div [ class "entity", clickTargetEvent entity ] (h2 [ HtmlAttr.style "color" color ] [ text "Entity" ] :: List.concatMap viewSkill skills))
+            Just (entityWrapper entity (List.concatMap viewSkill skills))
 
         ( stats, skills ) ->
             Components.Stat.getSumStats stats
                 |> Maybe.andThen
                     (\ss ->
-                        Just (div [ class "entity", clickTargetEvent entity ] (h2 [ HtmlAttr.style "color" color ] [ text "Entity" ] :: List.concatMap viewStat ss ++ List.concatMap viewSkill skills))
+                        Just (entityWrapper entity (List.concatMap viewStat ss ++ List.concatMap viewSkill skills))
                     )
 
 
