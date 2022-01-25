@@ -14,11 +14,12 @@ module ComponentData exposing
 import Components.Color exposing (Color)
 import Components.Skill exposing (Skill)
 import Components.Stat exposing (Stat)
+import Ecs
 
 
 type ComponentData
     = StatData Stat
-    | SkillData Skill
+    | SkillData (Skill Ecs.Entity)
     | ColorData Color
 
 
@@ -63,14 +64,14 @@ updateStat f cd =
 
 {-| Contruct new SkillData with provided skill
 -}
-skillCompData : Skill -> ComponentData
+skillCompData : Skill Ecs.Entity -> ComponentData
 skillCompData skill =
     SkillData skill
 
 
 {-| If given ComponentData is a skill, return skill
 -}
-getSkill : ComponentData -> Maybe Skill
+getSkill : ComponentData -> Maybe (Skill Ecs.Entity)
 getSkill cd =
     case cd of
         SkillData s ->
@@ -82,7 +83,7 @@ getSkill cd =
 
 {-| If given ComponentData is a skill, apply f to it and return
 -}
-updateSkill : (Skill -> Skill) -> ComponentData -> ComponentData
+updateSkill : (Skill Ecs.Entity -> Skill Ecs.Entity) -> ComponentData -> ComponentData
 updateSkill f cd =
     case cd of
         SkillData s ->

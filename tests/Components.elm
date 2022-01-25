@@ -30,6 +30,7 @@ compData =
                             { cooldown = newMeter 0 0
                             , name = "Unnamed Skill"
                             , description = "Skill description"
+                            , target = Nothing
                             }
                         )
         , test "Get stat from ComponentData thats's a SkillData variant, should return nothing" <|
@@ -45,6 +46,7 @@ compData =
                             { cooldown = newMeter 100 100
                             , name = "Unnamed Skill"
                             , description = "Skill description"
+                            , target = Nothing
                             }
                         )
         , test "Attempt SkillData update on Statdata, should return unchanged StatData" <|
@@ -229,6 +231,7 @@ skill =
                         { cooldown = newMeter 0 1000
                         , name = "Skill"
                         , description = "A skill"
+                        , target = Nothing
                         }
         , test "Create a new skill with invalid negative cooldown, should return a skill with 0 cooldown" <|
             \_ ->
@@ -237,6 +240,7 @@ skill =
                         { cooldown = newMeter 0 0
                         , name = "Skill"
                         , description = "A skill"
+                        , target = Nothing
                         }
         , test "Create a new skill with empty name, should return skill with default name" <|
             \_ ->
@@ -245,6 +249,7 @@ skill =
                         { cooldown = newMeter 0 1000
                         , name = "Unnamed Skill"
                         , description = "A skill"
+                        , target = Nothing
                         }
         , test "Create a new skill with empty description, shoild return a skill with default description" <|
             \_ ->
@@ -253,6 +258,7 @@ skill =
                         { cooldown = newMeter 0 1000
                         , name = "Skill"
                         , description = "Skill description"
+                        , target = Nothing
                         }
         , test "Reset skill cooldown to max" <|
             \_ ->
@@ -261,6 +267,7 @@ skill =
                         { cooldown = newMeter 1000 1000
                         , name = "Skill"
                         , description = "A skill"
+                        , target = Nothing
                         }
         , test "Reduce skill cooldown on a skill at max cooldown by 100" <|
             \_ ->
@@ -269,6 +276,7 @@ skill =
                         { cooldown = newMeter 900 1000
                         , name = "Skill"
                         , description = "A skill"
+                        , target = Nothing
                         }
         , test "Reduce skill cooldown on a skill at max cooldown by a negative number -100, should default to 0" <|
             \_ ->
@@ -277,6 +285,7 @@ skill =
                         { cooldown = newMeter 1000 1000
                         , name = "Skill"
                         , description = "A skill"
+                        , target = Nothing
                         }
         , test "Reduce skill cooldown on a skill where remaining cooldown is greater than cooldown time, should clamp cooldownLeft within 0 to cooldownTime " <|
             \_ ->
@@ -284,11 +293,13 @@ skill =
                     { cooldown = newMeter 2000 1000
                     , name = "Skill"
                     , description = "A skill"
+                    , target = Nothing
                     }
                     |> Expect.equal
                         { cooldown = newMeter 900 1000
                         , name = "Skill"
                         , description = "A skill"
+                        , target = Nothing
                         }
         , test "Reduce skill cooldown on a skill by a huge number that would put cooldown at a negative number, cooldown should be clamped to minumun 0" <|
             \_ ->
@@ -297,6 +308,7 @@ skill =
                         { cooldown = newMeter 0 1000
                         , name = "Skill"
                         , description = "A skill"
+                        , target = Nothing
                         }
         , test "Check if a skill with cooldown remaining = 0 is ready to use, should be true" <|
             \_ ->
@@ -314,6 +326,7 @@ skill =
                     { cooldown = newMeter -100 1000
                     , name = "Skill"
                     , description = "A skill"
+                    , target = Nothing
                     }
                     |> Expect.equal
                         True

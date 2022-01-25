@@ -49,7 +49,7 @@ viewMeter m =
         []
 
 
-viewSkill : ( EcsId, Skill ) -> List (Html GameMsg)
+viewSkill : ( EcsId, Skill Ecs.Entity ) -> List (Html GameMsg)
 viewSkill ( compId, skill ) =
     [ h3 [] [ text skill.name ]
     , p [] [ text skill.description ]

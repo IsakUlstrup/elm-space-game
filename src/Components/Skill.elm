@@ -1,15 +1,15 @@
 module Components.Skill exposing (Skill, isReady, newSkill, reduceCooldown, resetCooldown)
 
-{-| Skill type. cooldown moves from cooldown time to 0. So a skill with cooldownLeft = 0 is ready to use
--}
-
 import Components.Meter exposing (Meter, isEmpty, newMeter, setFull, subtract)
 
 
-type alias Skill =
+{-| Skill type. cooldown moves from cooldown time to 0. So a skill with cooldownLeft = 0 is ready to use
+-}
+type alias Skill t =
     { cooldown : Meter Float
     , name : String
     , description : String
+    , target : Maybe t
     }
 
 
@@ -20,7 +20,7 @@ Negative cooldowns will be clamped to 0
 Empty names and description will use defaults
 
 -}
-newSkill : Float -> String -> String -> Skill
+newSkill : Float -> String -> String -> Skill t
 newSkill cooldown name description =
     let
         defaultString n d =
@@ -35,11 +35,12 @@ newSkill cooldown name description =
         (newMeter 0 cooldown)
         (defaultString name "Unnamed Skill")
         (defaultString description "Skill description")
+        Nothing
 
 
 {-| Reset remaining cooldown to max cooldown
 -}
-resetCooldown : Skill -> Skill
+resetCooldown : Skill t -> Skill t
 resetCooldown skill =
     { skill | cooldown = setFull skill.cooldown }
 
@@ -49,13 +50,13 @@ resetCooldown skill =
 Negative amounts are ignored
 
 -}
-reduceCooldown : Float -> Skill -> Skill
+reduceCooldown : Float -> Skill t -> Skill t
 reduceCooldown amount skill =
     { skill | cooldown = subtract amount skill.cooldown }
 
 
 {-| Is skill ready to use predicate
 -}
-isReady : Skill -> Bool
+isReady : Skill t -> Bool
 isReady skill =
     isEmpty skill.cooldown
