@@ -26,7 +26,7 @@ type ComponentData
     = StatData Stat
     | SkillData (Skill Ecs.Entity)
     | ColorData Color
-    | BuffData (Buff Stat)
+    | BuffData Buff
 
 
 
@@ -140,14 +140,14 @@ updateColor f cd =
 
 {-| Contruct new BuffData with provided buff
 -}
-buffCompData : Buff Stat -> ComponentData
+buffCompData : Buff -> ComponentData
 buffCompData buff =
     BuffData buff
 
 
 {-| If given ComponentData is a buff, return buff
 -}
-getBuff : ComponentData -> Maybe (Buff Stat)
+getBuff : ComponentData -> Maybe Buff
 getBuff cd =
     case cd of
         BuffData b ->
@@ -159,7 +159,7 @@ getBuff cd =
 
 {-| If given ComponentData is a buff, apply f to it and return
 -}
-updateBuff : (Buff Stat -> Buff Stat) -> ComponentData -> ComponentData
+updateBuff : (Buff -> Buff) -> ComponentData -> ComponentData
 updateBuff f cd =
     case cd of
         BuffData b ->
@@ -171,7 +171,7 @@ updateBuff f cd =
 
 {-| Buff predicate
 -}
-buffPred : (Buff Stat -> Bool) -> ComponentData -> Bool
+buffPred : (Buff -> Bool) -> ComponentData -> Bool
 buffPred f cd =
     case cd of
         BuffData b ->

@@ -1,6 +1,39 @@
-module Components.Skill exposing (Skill, isReady, newSkill, reduceCooldown, resetCooldown, setTarget, unsetTarget)
+module Components.Skill exposing
+    ( Skill
+    , SkillEffect(..)
+    , buffEffect
+    , damageEffect
+    , isReady
+    , newSkill
+    , reduceCooldown
+    , resetCooldown
+    , setTarget
+    , unsetTarget
+    )
 
+import Components.Buff exposing (Buff)
 import Components.Meter exposing (Meter, isEmpty, newMeter, setFull, subtract)
+
+
+{-| Determines what effect a skill has on use
+-}
+type SkillEffect
+    = Damage Float
+    | Buff Buff
+
+
+{-| Create a skill effect that does some damage
+-}
+damageEffect : Float -> SkillEffect
+damageEffect damage =
+    Damage damage
+
+
+{-| Create a skill effect that applies a buff to target
+-}
+buffEffect : Buff -> SkillEffect
+buffEffect buff =
+    Buff buff
 
 
 {-| Skill type. cooldown moves from cooldown time to 0. So a skill with cooldownLeft = 0 is ready to use
@@ -10,6 +43,7 @@ type alias Skill t =
     , name : String
     , description : String
     , target : Maybe t
+    , effect : SkillEffect
     }
 
 
@@ -20,8 +54,8 @@ Negative cooldowns will be clamped to 0
 Empty names and description will use defaults
 
 -}
-newSkill : Float -> String -> String -> Skill t
-newSkill cooldown name description =
+newSkill : Float -> String -> String -> SkillEffect -> Skill t
+newSkill cooldown name description effect =
     let
         defaultString n d =
             if String.isEmpty n then
@@ -35,6 +69,7 @@ newSkill cooldown name description =
         (defaultString name "Unnamed Skill")
         (defaultString description "Skill description")
         Nothing
+        effect
 
 
 {-| Reset remaining cooldown to max cooldown

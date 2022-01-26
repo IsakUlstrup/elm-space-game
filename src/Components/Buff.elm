@@ -1,19 +1,20 @@
 module Components.Buff exposing (Buff, isActive, newBuff, reduceDuration)
 
 import Components.Meter exposing (Meter)
+import Components.Stat exposing (Stat)
 
 
-type alias Buff e =
+type alias Buff =
     { name : String
     , description : String
-    , effects : List e
+    , effects : List Stat
     , duration : Maybe (Meter Float)
     }
 
 
 {-| Buff constructor
 -}
-newBuff : String -> String -> List e -> Maybe (Meter Float) -> Buff e
+newBuff : String -> String -> List Stat -> Maybe (Meter Float) -> Buff
 newBuff name description effects duration =
     let
         stringWithDefault d s =
@@ -32,7 +33,7 @@ newBuff name description effects duration =
 
 {-| Reduce remaining duration if not infinite
 -}
-reduceDuration : Float -> Buff e -> Buff e
+reduceDuration : Float -> Buff -> Buff
 reduceDuration amount buff =
     case buff.duration of
         Just duration ->
@@ -44,7 +45,7 @@ reduceDuration amount buff =
 
 {-| Is buff active?
 -}
-isActive : Buff e -> Bool
+isActive : Buff -> Bool
 isActive buff =
     case buff.duration of
         Just duration ->

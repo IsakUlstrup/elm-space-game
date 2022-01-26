@@ -65,7 +65,7 @@ viewSkill ( compId, skill ) =
     ]
 
 
-viewBuff : Buff Stat -> List (Html GameMsg)
+viewBuff : Buff -> List (Html GameMsg)
 viewBuff buff =
     let
         viewDuration b =

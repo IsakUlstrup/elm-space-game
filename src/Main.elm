@@ -3,7 +3,7 @@ module Main exposing (..)
 import Browser
 import Browser.Events
 import ComponentData exposing (buffCompData, colorCompData, skillCompData, statCompData)
-import Components.Buff
+import Components.Buff exposing (Buff)
 import Components.Color
 import Components.Meter exposing (newMeter)
 import Components.Skill
@@ -14,6 +14,15 @@ import Html exposing (Html, div)
 import Systems.BuffSystem exposing (buffSystem)
 import Systems.SkillSystem exposing (skillSystem)
 import View
+
+
+skillBuff : Buff
+skillBuff =
+    Components.Buff.newBuff
+        "Skill buff"
+        "Skill effect buff"
+        [ Components.Stat.powerStat 3 ]
+        (Just (newMeter 1000 1000))
 
 
 type Msg
@@ -36,12 +45,19 @@ init =
             [ statCompData (Components.Stat.powerStat 3)
             , statCompData (Components.Stat.hullStat 3)
             , statCompData (Components.Stat.powerStat 3 |> Components.Stat.reduceStatValue 2)
-            , skillCompData (Components.Skill.newSkill 5000 "Super skill" "The best skill" |> Components.Skill.resetCooldown)
+            , skillCompData (Components.Skill.newSkill 5000 "Super skill" "The best skill" (Components.Skill.damageEffect 10) |> Components.Skill.resetCooldown)
             , colorCompData Components.Color.initColor
             ]
         |> Ecs.addEntity [ statCompData (Components.Stat.shieldStat 15 |> Components.Stat.reduceStatValue 8) ]
         |> Ecs.addEntity [ statCompData (Components.Stat.hullStat 30) ]
-        |> Ecs.addEntity [ skillCompData (Components.Skill.newSkill 5000 "Super skill" "The best skill") ]
+        |> Ecs.addEntity
+            [ skillCompData
+                (Components.Skill.newSkill 5000
+                    "Buff skill"
+                    "buffs target"
+                    (Components.Skill.buffEffect skillBuff)
+                )
+            ]
         |> Ecs.addEntity
             [ statCompData (Components.Stat.hullStat 3)
             , statCompData (Components.Stat.powerStat 3)
