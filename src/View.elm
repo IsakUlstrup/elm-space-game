@@ -53,6 +53,15 @@ viewMeter m =
 viewSkill : ( EcsId, Skill Ecs.Entity ) -> List (Html GameMsg)
 viewSkill ( compId, skill ) =
     let
+        targetString =
+            case skill.target of
+                Just _ ->
+                    "entity"
+
+                Nothing ->
+                    "None"
+    in
+    let
         attrs =
             case skill.target of
                 Just trgt ->
@@ -69,7 +78,7 @@ viewSkill ( compId, skill ) =
         [ h3 [] [ text skill.name ]
         , p [] [ text skill.description ]
         , p [] [ text "id: ", text (String.fromInt (Ecs.idToInt compId)) ]
-        , p [] [ text (Debug.toString skill.target) ]
+        , p [] [ text targetString ]
         , viewMeter skill.cooldown
         ]
     ]
@@ -113,7 +122,7 @@ viewEntity ( entity, components ) =
 
         entityWrapper e cs =
             div [ class "entity" ]
-                (h2 [ HtmlAttr.style "color" color, clickTargetEvent e ] [ text (Debug.toString e) ] :: cs)
+                (h2 [ HtmlAttr.style "color" color, clickTargetEvent e ] [ text "Entity" ] :: cs)
     in
     case
         ( List.filterMap ComponentData.getStat (List.map Tuple.second components)
