@@ -52,10 +52,20 @@ viewMeter m =
 
 viewSkill : ( EcsId, Skill Ecs.Entity ) -> List (Html GameMsg)
 viewSkill ( compId, skill ) =
+    let
+        attrs =
+            case skill.target of
+                Just trgt ->
+                    [ Html.Events.onClick (UseSkill compId trgt skill.effect)
+                    , HtmlAttr.disabled (Components.Skill.isReady skill |> not)
+                    ]
+
+                Nothing ->
+                    [ HtmlAttr.disabled True
+                    ]
+    in
     [ button
-        [ Html.Events.onClick (UseSkill compId)
-        , HtmlAttr.disabled (Components.Skill.isReady skill |> not)
-        ]
+        attrs
         [ h3 [] [ text skill.name ]
         , p [] [ text skill.description ]
         , p [] [ text "id: ", text (String.fromInt (Ecs.idToInt compId)) ]

@@ -1,6 +1,7 @@
 module GameData exposing (GameMsg(..), GameScene, GameSystem)
 
 import ComponentData exposing (ComponentData)
+import Components.Skill exposing (SkillEffect)
 import Ecs exposing (EcsId, Entity)
 
 
@@ -14,5 +15,5 @@ type alias GameScene =
 
 type GameMsg
     = GameTick Float
-    | UseSkill EcsId
+    | UseSkill EcsId Entity SkillEffect
     | SetSkillTarget Entity

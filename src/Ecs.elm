@@ -3,6 +3,7 @@ module Ecs exposing
     , Entity
     , Scene
     , System
+    , addComponents
     , addEntity
     , addSystem
     , emptyScene
