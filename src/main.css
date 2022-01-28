@@ -20,3 +20,23 @@ body {
   color: #293c4b;
   padding: 2rem;
 }
+
+.entities {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.entity {
+  border: 1px solid #262626;
+  border-radius: 0.3rem;
+  margin: 1rem;
+  padding: 1rem;
+  width: 15rem;
+}
+
+.buff {
+  border: 1px solid magenta;
+  border-radius: 0.2rem;
+  margin: 0.5rem;
+  padding: 0.5rem;
+}

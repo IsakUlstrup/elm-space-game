@@ -10,7 +10,7 @@ import Components.Skill
 import Components.Stat
 import Ecs
 import GameData exposing (GameMsg, GameScene)
-import Html exposing (Html, div)
+import Html exposing (Html)
 import Systems.BuffSystem exposing (buffSystem)
 import Systems.SkillSystem exposing (skillSystem)
 import View
@@ -19,10 +19,10 @@ import View
 skillBuff : Buff
 skillBuff =
     Components.Buff.newBuff
-        "Skill buff"
-        "Skill effect buff"
+        "Power buff"
+        "buffs power stat"
         [ Components.Stat.powerStat 3 ]
-        (Just (newMeter 1000 1000))
+        (Just (newMeter 5000 5000))
 
 
 type Msg
@@ -52,24 +52,24 @@ init =
         |> Ecs.addEntity [ statCompData (Components.Stat.hullStat 30) ]
         |> Ecs.addEntity
             [ skillCompData
-                (Components.Skill.newSkill 5000
+                (Components.Skill.newSkill 1000
                     "Buff skill"
-                    "buffs target"
+                    "buffs power"
                     (Components.Skill.buffEffect skillBuff)
                 )
             ]
         |> Ecs.addEntity
             [ statCompData (Components.Stat.hullStat 3)
             , statCompData (Components.Stat.powerStat 3)
-            , buffCompData (Components.Buff.newBuff "Power buff" "" [ Components.Stat.powerStat 3 ] (Just (newMeter 10000 10000)))
+            , buffCompData (Components.Buff.newBuff "Power buff" "Buffs power stat" [ Components.Stat.powerStat 3 ] (Just (newMeter 10000 10000)))
             , colorCompData
                 (Components.Color.initColor
-                    |> Components.Color.withHue 120
+                    |> Components.Color.withHue 40
                     |> Components.Color.withLightness 40
                 )
             ]
-        |> Ecs.addEntity [ buffCompData (Components.Buff.newBuff "Power buff" "" [ Components.Stat.powerStat 3 ] (Just (newMeter 1000 1000))) ]
-        |> Ecs.addEntity [ buffCompData (Components.Buff.newBuff "Power buff" "" [ Components.Stat.powerStat 3 ] Nothing) ]
+        |> Ecs.addEntity [ buffCompData (Components.Buff.newBuff "Power buff" "Buffs power stat" [ Components.Stat.powerStat 3 ] (Just (newMeter 1000 1000))) ]
+        |> Ecs.addEntity [ buffCompData (Components.Buff.newBuff "Power buff" "Buffs power stat" [ Components.Stat.powerStat 3 ] Nothing) ]
         |> Ecs.addSystem skillSystem
         |> Ecs.addSystem buffSystem
     , Cmd.none
@@ -96,9 +96,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ Html.map GameMsg (View.viewScene model)
-        ]
+    Html.map GameMsg (View.viewScene model)
 
 
 

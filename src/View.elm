@@ -8,7 +8,7 @@ import Components.Skill exposing (Skill)
 import Components.Stat exposing (Stat, StatType(..))
 import Ecs exposing (EcsId, Entity)
 import GameData exposing (GameMsg(..), GameScene)
-import Html exposing (Html, button, div, h2, h3, li, meter, p, text, ul)
+import Html exposing (Html, br, button, div, h2, h3, meter, p, strong, text)
 import Html.Attributes as HtmlAttr exposing (class)
 import Html.Events
 
@@ -27,9 +27,9 @@ viewStat stat =
                 Shield ->
                     "Shield"
     in
-    [ h3 [] [ text statTypeString ]
-    , p []
-        [ text (String.fromInt stat.value)
+    [ p []
+        [ strong [] [ text statTypeString, text ": " ]
+        , text (String.fromInt stat.value)
         , text "/"
         , text (String.fromInt stat.cap)
         ]
@@ -86,11 +86,16 @@ viewBuff buff =
                 Nothing ->
                     p [] [ text "Infinite" ]
     in
-    [ h3 [] [ text "Buff: ", text buff.name ]
-    , p [] [ text buff.description ]
-    , p [] [ text "effects:" ]
-    , ul [] (List.map (\s -> li [] (viewStat s)) buff.effects)
-    , p [] [ text "duration: ", viewDuration buff ]
+    [ p [ class "buff" ]
+        [ text buff.description
+        , br [] []
+        , text "duration: "
+        , viewDuration buff
+        ]
+
+    -- , p [] [ text "effects:" ]
+    -- , ul [] (List.map (\s -> li [] (viewStat s)) buff.effects)
+    -- , p [] [ text "duration: ", viewDuration buff ]
     ]
 
 
@@ -135,4 +140,4 @@ viewEntity ( entity, components ) =
 
 viewScene : GameScene -> Html GameMsg
 viewScene scene =
-    div [] (List.filterMap identity (Ecs.mapEntitiesWithComponents viewEntity scene))
+    div [ class "entities" ] (List.filterMap identity (Ecs.mapEntitiesWithComponents viewEntity scene))
