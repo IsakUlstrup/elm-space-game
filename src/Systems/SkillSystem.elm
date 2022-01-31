@@ -10,8 +10,12 @@ skillSystem : GameMsg -> GameScene -> GameScene
 skillSystem msg scene =
     case msg of
         GameTick dt ->
+            let
+                cooldownRate =
+                    1
+            in
             scene
-                |> Ecs.updateComponents (ComponentData.updateSkill (Components.Skill.reduceCooldown dt))
+                |> Ecs.updateComponents (ComponentData.updateSkill (Components.Skill.reduceCooldown (dt * cooldownRate)))
 
         UseSkill skillId target effect ->
             case effect of

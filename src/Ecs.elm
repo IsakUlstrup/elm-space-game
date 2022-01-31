@@ -171,6 +171,22 @@ addComponents parent compDatas scene =
             addComponent parent d (addComponents parent ds scene)
 
 
+{-| Update a single component with a given function
+-}
+updateComponent : EcsId -> (compData -> compData) -> Scene compData msg -> Scene compData msg
+updateComponent compId f (Scene scene) =
+    let
+        updateCompData : EcsId -> (compData -> compData) -> Component compData -> Component compData
+        updateCompData i func (Component c) =
+            if i == c.id then
+                Component { c | data = func c.data }
+
+            else
+                Component c
+    in
+    Scene { scene | components = List.map (updateCompData compId f) scene.components }
+
+
 {-| Update all components with a given function
 -}
 updateComponents : (compData -> compData) -> Scene compData msg -> Scene compData msg
@@ -193,22 +209,6 @@ filterComponents pred (Scene scene) =
             pred c.data
     in
     Scene { scene | components = List.filter compDataPred scene.components }
-
-
-{-| Update a single component with a given function
--}
-updateComponent : EcsId -> (compData -> compData) -> Scene compData msg -> Scene compData msg
-updateComponent compId f (Scene scene) =
-    let
-        updateCompData : EcsId -> (compData -> compData) -> Component compData -> Component compData
-        updateCompData i func (Component c) =
-            if i == c.id then
-                Component { c | data = func c.data }
-
-            else
-                Component c
-    in
-    Scene { scene | components = List.map (updateCompData compId f) scene.components }
 
 
 

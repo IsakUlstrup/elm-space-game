@@ -21,17 +21,12 @@ viewStat stat =
                 Power ->
                     "Power"
 
-                Hull ->
-                    "Hull"
-
-                Shield ->
-                    "Shield"
+                CooldownRecovery ->
+                    "Cooldown Recovery"
     in
     [ p []
         [ strong [] [ text statTypeString, text ": " ]
-        , text (String.fromInt stat.value)
-        , text "/"
-        , text (String.fromInt stat.cap)
+        , text (String.fromFloat stat.value)
         ]
     ]
 
@@ -56,7 +51,7 @@ viewSkill ( compId, skill ) =
         targetString =
             case skill.target of
                 Just _ ->
-                    "entity"
+                    "Entity"
 
                 Nothing ->
                     "None"
@@ -78,7 +73,7 @@ viewSkill ( compId, skill ) =
         [ h3 [] [ text skill.name ]
         , p [] [ text skill.description ]
         , p [] [ text "id: ", text (String.fromInt (Ecs.idToInt compId)) ]
-        , p [] [ text targetString ]
+        , p [] [ text "target: ", text targetString ]
         , viewMeter skill.cooldown
         ]
     ]
