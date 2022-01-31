@@ -6,7 +6,9 @@ import Components.Color
 import Components.Meter exposing (newMeter)
 import Components.Skill exposing (Skill, SkillEffect(..), buffEffect, damageEffect, newSkill, reduceCooldown, resetCooldown)
 import Components.Stat exposing (StatType(..), getSumStats, hullStat, powerStat, reduceStatValue, shieldStat, statAdd, statEq)
+import Components.Stat2
 import Expect
+import Fuzz exposing (..)
 import Test exposing (..)
 
 
