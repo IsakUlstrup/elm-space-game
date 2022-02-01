@@ -100,17 +100,15 @@ viewBuff buff =
 
 viewPart : EcsId -> Part EcsId -> Html GameMsg
 viewPart pid part =
-    div
-        [ class "entity"
-        ]
+    div [ class "entity" ]
         [ h3
             [ style "color" (toCssString part.color)
             , Html.Events.onClick (SetSkillTarget pid)
             ]
             [ text (idToInt pid |> String.fromInt), text " Module: ", text part.name ]
         , p [] [ text "durability: ", viewMeter part.durability ]
-        , div [] (List.indexedMap (\i s -> viewSkill pid ( i, s )) part.skills)
-        , div [] (List.map viewBuff part.stats)
+        , div [] (h3 [] [ text "skills" ] :: List.indexedMap (\i s -> viewSkill pid ( i, s )) part.skills)
+        , div [] (h3 [] [ text "buffs" ] :: List.map viewBuff part.stats)
         , div [] (h3 [] [ text "stats" ] :: List.map viewStat (getStats part))
         ]
 
