@@ -1,6 +1,7 @@
 module Systems.SkillSystem exposing (skillSystem)
 
 import ComponentData
+import Components.Part
 import Components.Skill exposing (SkillEffect(..))
 import Ecs
 import GameData exposing (GameMsg(..), GameScene)
@@ -10,25 +11,22 @@ skillSystem : GameMsg -> GameScene -> GameScene
 skillSystem msg scene =
     case msg of
         GameTick dt ->
-            let
-                cooldownRate =
-                    1
-            in
             scene
-                |> Ecs.updateComponents (ComponentData.updateSkill (Components.Skill.reduceCooldown (dt * cooldownRate)))
+                |> Ecs.updateComponents (ComponentData.updatePart (Components.Part.reduceSkillCooldown dt))
 
-        UseSkill skillId target effect ->
-            case effect of
-                Damage _ ->
+        UseSkill ( partId, skillIndex ) ( targetId, skilleffect ) ->
+            case skilleffect of
+                Damage dmg ->
                     -- Not implemented yet
                     scene
-                        |> Ecs.updateComponent skillId (ComponentData.updateSkill Components.Skill.resetCooldown)
+                        |> Ecs.updateComponent partId (ComponentData.updatePart (Components.Part.resetSkillCooldown skillIndex))
+                        |> Ecs.updateComponent targetId (ComponentData.updatePart (Components.Part.damage dmg))
 
                 Buff buff ->
                     scene
-                        |> Ecs.updateComponent skillId (ComponentData.updateSkill Components.Skill.resetCooldown)
-                        |> Ecs.addComponents target [ ComponentData.buffCompData buff ]
+                        |> Ecs.updateComponent partId (ComponentData.updatePart (Components.Part.resetSkillCooldown skillIndex))
+                        |> Ecs.updateComponent targetId (ComponentData.updatePart (Components.Part.addBuff buff))
 
         SetSkillTarget target ->
             scene
-                |> Ecs.updateComponents (ComponentData.updateSkill (Components.Skill.setTarget target))
+                |> Ecs.updateComponents (ComponentData.updatePart (Components.Part.setSkillTarget target))

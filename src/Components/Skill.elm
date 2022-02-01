@@ -65,7 +65,7 @@ newSkill cooldown name description effect =
                 n
     in
     Skill
-        (newMeter 0 cooldown)
+        (newMeter cooldown cooldown)
         (defaultString name "Unnamed Skill")
         (defaultString description "Skill description")
         Nothing

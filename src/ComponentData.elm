@@ -5,21 +5,26 @@ module ComponentData exposing
     , colorCompData
     , getBuff
     , getColor
+    , getPart
     , getSkill
     , getStat
+    , partCompData
+    , partPred
     , skillCompData
     , statCompData
     , updateBuff
     , updateColor
+    , updatePart
     , updateSkill
     , updateStat
     )
 
 import Components.Buff exposing (Buff)
 import Components.Color exposing (Color)
+import Components.Part exposing (Part)
 import Components.Skill exposing (Skill)
 import Components.Stat exposing (Stat)
-import Ecs
+import Ecs exposing (EcsId)
 
 
 type ComponentData
@@ -27,6 +32,7 @@ type ComponentData
     | SkillData (Skill Ecs.Entity)
     | ColorData Color
     | BuffData Buff
+    | PartData (Part Ecs.EcsId)
 
 
 
@@ -175,6 +181,53 @@ buffPred : (Buff -> Bool) -> ComponentData -> Bool
 buffPred f cd =
     case cd of
         BuffData b ->
+            f b
+
+        _ ->
+            True
+
+
+
+---- PART ----
+
+
+{-| Contruct new PartData with provided part
+-}
+partCompData : Part Ecs.EcsId -> ComponentData
+partCompData part =
+    PartData part
+
+
+{-| If given ComponentData is a part, return part
+-}
+getPart : ComponentData -> Maybe (Part Ecs.EcsId)
+getPart cd =
+    case cd of
+        PartData s ->
+            Just s
+
+        _ ->
+            Nothing
+
+
+{-| If given ComponentData is a part, apply f to it and return
+-}
+updatePart : (Part Ecs.EcsId -> Part Ecs.EcsId) -> ComponentData -> ComponentData
+updatePart f cd =
+    case cd of
+        PartData s ->
+            PartData (f s)
+
+        _ ->
+            cd
+
+
+{-| Part predicate
+-}
+partPred : (Part EcsId -> Bool) -> ComponentData -> Bool
+partPred f cd =
+    case cd of
+        PartData b ->
             f b
 
         _ ->

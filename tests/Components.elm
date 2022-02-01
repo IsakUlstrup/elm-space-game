@@ -5,7 +5,7 @@ import Components.Buff exposing (Buff)
 import Components.Color
 import Components.Meter exposing (newMeter)
 import Components.Skill exposing (Skill, SkillEffect(..), buffEffect, damageEffect, newSkill, reduceCooldown, resetCooldown)
-import Components.Stat exposing (StatType(..), powerStat)
+import Components.Stat exposing (StatModifier(..), StatType(..), powerStat)
 import Expect
 import Fuzz exposing (..)
 import Test exposing (..)
@@ -19,7 +19,7 @@ compData =
                 getStat (statCompData (powerStat 0))
                     |> Expect.equal
                         (Just
-                            { value = 0
+                            { modifiers = [ Add 0 ]
                             , statType = Power
                             }
                         )
@@ -56,13 +56,13 @@ compData =
             \_ ->
                 updateSkill resetCooldown
                     (statCompData
-                        { value = 0
+                        { modifiers = []
                         , statType = Power
                         }
                     )
                     |> Expect.equal
                         (statCompData
-                            { value = 0
+                            { modifiers = []
                             , statType = Power
                             }
                         )
@@ -245,7 +245,7 @@ skill =
             \_ ->
                 newSkill 1000 "Skill" "A skill" (damageEffect 10)
                     |> Expect.equal
-                        { cooldown = newMeter 0 1000
+                        { cooldown = newMeter 1000 1000
                         , name = "Skill"
                         , description = "A skill"
                         , target = Nothing
@@ -255,7 +255,7 @@ skill =
             \_ ->
                 newSkill 1000 "Skill" "A skill" (buffEffect skillBuff)
                     |> Expect.equal
-                        { cooldown = newMeter 0 1000
+                        { cooldown = newMeter 1000 1000
                         , name = "Skill"
                         , description = "A skill"
                         , target = Nothing
@@ -281,7 +281,7 @@ skill =
             \_ ->
                 newSkill 1000 "" "A skill" (damageEffect 10)
                     |> Expect.equal
-                        { cooldown = newMeter 0 1000
+                        { cooldown = newMeter 1000 1000
                         , name = "Unnamed Skill"
                         , description = "A skill"
                         , target = Nothing
@@ -291,7 +291,7 @@ skill =
             \_ ->
                 newSkill 1000 "Skill" "" (damageEffect 10)
                     |> Expect.equal
-                        { cooldown = newMeter 0 1000
+                        { cooldown = newMeter 1000 1000
                         , name = "Skill"
                         , description = "Skill description"
                         , target = Nothing

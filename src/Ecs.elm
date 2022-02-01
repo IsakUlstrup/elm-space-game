@@ -7,9 +7,10 @@ module Ecs exposing
     , addEntity
     , addSystem
     , emptyScene
+    , entityIdToInt
     , filterComponents
     , idToInt
-    , mapEntitiesWithComponents
+    , mapComponents
     , runSystems
     , updateComponent
     , updateComponents
@@ -80,6 +81,13 @@ idToInt (EcsId id) =
     id
 
 
+{-| Entity to int, for rendering
+-}
+entityIdToInt : Entity -> Int
+entityIdToInt (Entity entity) =
+    idToInt entity
+
+
 
 ---- SCENE ----
 
@@ -120,28 +128,6 @@ addEntity components (Scene scene) =
         }
         |> incId
         |> addComponents entity components
-
-
-{-| Map entities given a function that takes an entity and a list of id component tuples, useful for rendering
--}
-mapEntitiesWithComponents : (( Entity, List ( EcsId, compData ) ) -> a) -> Scene compData msg -> List a
-mapEntitiesWithComponents f (Scene scene) =
-    let
-        compData : Entity -> Component compData -> Maybe ( EcsId, compData )
-        compData e (Component c) =
-            if c.parent == e then
-                Just ( c.id, c.data )
-
-            else
-                Nothing
-
-        entityWithComponents e =
-            ( e, List.filterMap (compData e) scene.components )
-    in
-    List.map
-        entityWithComponents
-        scene.entities
-        |> List.map f
 
 
 
@@ -209,6 +195,18 @@ filterComponents pred (Scene scene) =
             pred c.data
     in
     Scene { scene | components = List.filter compDataPred scene.components }
+
+
+{-| Map components
+-}
+mapComponents : (EcsId -> compData -> a) -> Scene compData msg -> List a
+mapComponents f (Scene scene) =
+    let
+        mapCompData : (EcsId -> compData -> a) -> Component compData -> a
+        mapCompData func (Component c) =
+            func c.id c.data
+    in
+    List.map (mapCompData f) scene.components
 
 
 

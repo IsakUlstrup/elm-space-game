@@ -2,15 +2,17 @@ module Main exposing (..)
 
 import Browser
 import Browser.Events
-import ComponentData exposing (skillCompData, statCompData)
+import ComponentData exposing (partCompData)
 import Components.Buff exposing (Buff)
 import Components.Meter exposing (newMeter)
+import Components.Part exposing (newPart)
 import Components.Skill
 import Components.Stat
 import Ecs
 import GameData exposing (GameMsg, GameScene)
 import Html exposing (Html)
 import Systems.BuffSystem exposing (buffSystem)
+import Systems.DeathSystem exposing (deathSystem)
 import Systems.SkillSystem exposing (skillSystem)
 import View
 
@@ -20,7 +22,7 @@ skillBuff =
     Components.Buff.newBuff
         "Stasis"
         "Stops cooldown recovery"
-        [ Components.Stat.cooldownRecoveryStat 3 |> Components.Stat.applyModifiers [ Components.Stat.setSubModifier 0 ] ]
+        [ Components.Stat.cooldownRecoveryStat 3 |> Components.Stat.addModifiers [ Components.Stat.setSubModifier 0 ] ]
         (Just (newMeter 5000 5000))
 
 
@@ -41,44 +43,43 @@ init : ( Model, Cmd Msg )
 init =
     ( Ecs.emptyScene 0
         |> Ecs.addEntity
-            [ statCompData (Components.Stat.powerStat 1)
-            , skillCompData
-                (Components.Skill.newSkill 1000
-                    "EMP Blast"
-                    "Stops target cooldown recovery"
-                    (Components.Skill.buffEffect skillBuff)
+            [ partCompData
+                (newPart "Test part"
+                    [ Components.Skill.newSkill 1000
+                        "EMP"
+                        "disables skill cooldown recovery"
+                        (Components.Skill.buffEffect skillBuff)
+                    , Components.Skill.newSkill 1000
+                        "Laser"
+                        "dps"
+                        (Components.Skill.damageEffect 10)
+                    ]
+                    [ skillBuff
+                    ]
                 )
             ]
-        --     [ statCompData (Components.Stat.powerStat 3)
-        --     , statCompData (Components.Stat.hullStat 3)
-        --     , statCompData (Components.Stat.powerStat 3 |> Components.Stat.reduceStatValue 2)
-        --     , skillCompData (Components.Skill.newSkill 5000 "Super skill" "The best skill" (Components.Skill.damageEffect 10) |> Components.Skill.resetCooldown)
-        --     , colorCompData Components.Color.initColor
-        --     ]
-        -- |> Ecs.addEntity [ statCompData (Components.Stat.shieldStat 15 |> Components.Stat.reduceStatValue 8) ]
-        -- |> Ecs.addEntity [ statCompData (Components.Stat.hullStat 30) ]
-        -- |> Ecs.addEntity
-        --     [ skillCompData
-        --         (Components.Skill.newSkill 1000
-        --             "Buff skill"
-        --             "buffs power"
-        --             (Components.Skill.buffEffect skillBuff)
-        --         )
-        --     ]
-        -- |> Ecs.addEntity
-        --     [ statCompData (Components.Stat.hullStat 3)
-        --     , statCompData (Components.Stat.powerStat 3)
-        --     , buffCompData (Components.Buff.newBuff "Power buff" "Buffs power stat" [ Components.Stat.powerStat 3 ] (Just (newMeter 10000 10000)))
-        --     , colorCompData
-        --         (Components.Color.initColor
-        --             |> Components.Color.withHue 40
-        --             |> Components.Color.withLightness 40
-        --         )
-        --     ]
-        -- |> Ecs.addEntity [ buffCompData (Components.Buff.newBuff "Power buff" "Buffs power stat" [ Components.Stat.powerStat 3 ] (Just (newMeter 1000 1000))) ]
-        -- |> Ecs.addEntity [ buffCompData (Components.Buff.newBuff "Power buff" "Buffs power stat" [ Components.Stat.powerStat 3 ] Nothing) ]
+        |> Ecs.addEntity []
+        |> Ecs.addEntity []
+        |> Ecs.addEntity []
+        |> Ecs.addEntity
+            [ partCompData
+                (newPart "Test part"
+                    [ Components.Skill.newSkill 1000
+                        "Buff skill"
+                        "buffs power"
+                        (Components.Skill.buffEffect skillBuff)
+                    ]
+                    [ Components.Buff.newBuff
+                        "Stasis"
+                        "Stops cooldown recovery"
+                        [ Components.Stat.cooldownRecoveryStat 3 |> Components.Stat.addModifiers [ Components.Stat.setSubModifier 0 ] ]
+                        Nothing
+                    ]
+                )
+            ]
         |> Ecs.addSystem skillSystem
         |> Ecs.addSystem buffSystem
+        |> Ecs.addSystem deathSystem
     , Cmd.none
     )
 

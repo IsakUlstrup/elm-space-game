@@ -34,7 +34,7 @@ type StatType
 
 type alias Stat =
     { statType : StatType
-    , value : Float
+    , modifiers : List StatModifier
     }
 
 
@@ -42,14 +42,14 @@ type alias Stat =
 -}
 powerStat : Float -> Stat
 powerStat init =
-    Stat Power init
+    Stat Power [ Add init ]
 
 
 {-| Create a new cooldown recovery stat
 -}
 cooldownRecoveryStat : Float -> Stat
 cooldownRecoveryStat init =
-    Stat CooldownRecovery init
+    Stat CooldownRecovery [ Add init ]
 
 
 add : List StatModifier -> Float -> Float
@@ -100,20 +100,17 @@ setMulti mods sum =
     List.foldl multiAccum 1 mods * sum
 
 
-{-| Apply a list of stat modifiers, order of operations is add/subtract -> multiply -> set multiply
+{-| Compute stat value based on modifiers. order of operations is add/subtract -> multiply -> set multiply
 
 If a SetMultiplier of 0 is included, result will always be 0
 
 -}
-applyModifiers : List StatModifier -> Stat -> Stat
-applyModifiers mods stat =
-    { stat
-        | value =
-            stat.value
-                |> add mods
-                |> multi mods
-                |> setMulti mods
-    }
+getStatValue : Stat -> Float
+getStatValue stat =
+    0
+        |> add stat.modifiers
+        |> multi stat.modifiers
+        |> setMulti stat.modifiers
 
 
 {-| Stat equality, useful for filtering similar stats
@@ -138,16 +135,23 @@ statEq stat1 stat2 =
                     False
 
 
-{-| Add stat value and cap to sum if they are the same type
+{-| Add modifiers to stat
 -}
-statAdd : Stat -> Stat -> Stat
-statAdd stat1 stat2 =
+addModifiers : List StatModifier -> Stat -> Stat
+addModifiers mods stat =
+    { stat | modifiers = mods ++ stat.modifiers }
+
+
+{-| combine the modifiers of two stats if they are of same type
+-}
+statCombine : Stat -> Stat -> Stat
+statCombine stat1 stat2 =
     case stat1.statType of
         Power ->
             case stat2.statType of
                 Power ->
                     { stat1
-                        | value = stat1.value + stat2.value
+                        | modifiers = stat1.modifiers ++ stat2.modifiers
                     }
 
                 _ ->
@@ -157,7 +161,7 @@ statAdd stat1 stat2 =
             case stat2.statType of
                 CooldownRecovery ->
                     { stat1
-                        | value = stat1.value + stat2.value
+                        | modifiers = stat1.modifiers ++ stat2.modifiers
                     }
 
                 _ ->
@@ -173,7 +177,7 @@ getSumStat targetStat stats =
             Nothing
 
         matchingStats ->
-            Just (List.foldl statAdd targetStat matchingStats)
+            Just (List.foldl statCombine targetStat matchingStats)
 
 
 {-| Given a list of stats, return the sum of all power stats if any
@@ -190,11 +194,6 @@ getSumCooldownRecovery stats =
     getSumStat (cooldownRecoveryStat 0) stats
 
 
-getSumStats : List Stat -> Maybe (List Stat)
+getSumStats : List Stat -> List Stat
 getSumStats stats =
-    case List.filterMap identity [ getSumPower stats, getSumCooldownRecovery stats ] of
-        [] ->
-            Nothing
-
-        sumStats ->
-            Just sumStats
+    List.filterMap identity [ getSumPower stats, getSumCooldownRecovery stats ]

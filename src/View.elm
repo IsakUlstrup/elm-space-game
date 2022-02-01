@@ -2,18 +2,19 @@ module View exposing (..)
 
 import ComponentData
 import Components.Buff exposing (Buff)
-import Components.Color
+import Components.Color exposing (toCssString)
 import Components.Meter exposing (Meter)
+import Components.Part exposing (Part, getStats)
 import Components.Skill exposing (Skill)
-import Components.Stat exposing (Stat, StatType(..))
-import Ecs exposing (EcsId, Entity)
+import Components.Stat exposing (Stat, StatType(..), getStatValue)
+import Ecs exposing (EcsId, idToInt)
 import GameData exposing (GameMsg(..), GameScene)
-import Html exposing (Html, br, button, div, h2, h3, meter, p, strong, text)
-import Html.Attributes as HtmlAttr exposing (class)
+import Html exposing (Html, br, button, div, h3, meter, p, strong, text)
+import Html.Attributes as HtmlAttr exposing (class, style)
 import Html.Events
 
 
-viewStat : Stat -> List (Html msg)
+viewStat : Stat -> Html msg
 viewStat stat =
     let
         statTypeString =
@@ -24,11 +25,10 @@ viewStat stat =
                 CooldownRecovery ->
                     "Cooldown Recovery"
     in
-    [ p []
+    p []
         [ strong [] [ text statTypeString, text ": " ]
-        , text (String.fromFloat stat.value)
+        , text (stat |> getStatValue |> String.fromFloat)
         ]
-    ]
 
 
 viewMeter : Meter Float -> Html msg
@@ -45,13 +45,13 @@ viewMeter m =
         []
 
 
-viewSkill : ( EcsId, Skill Ecs.Entity ) -> List (Html GameMsg)
-viewSkill ( compId, skill ) =
+viewSkill : EcsId -> ( Int, Skill EcsId ) -> Html GameMsg
+viewSkill compId ( skillIndex, skill ) =
     let
         targetString =
             case skill.target of
-                Just _ ->
-                    "Entity"
+                Just trgt ->
+                    idToInt trgt |> String.fromInt
 
                 Nothing ->
                     "None"
@@ -60,7 +60,8 @@ viewSkill ( compId, skill ) =
         attrs =
             case skill.target of
                 Just trgt ->
-                    [ Html.Events.onClick (UseSkill compId trgt skill.effect)
+                    -- ( EcsId, Int ) ( EcsId, SkillEffect )
+                    [ Html.Events.onClick (UseSkill ( compId, skillIndex ) ( trgt, skill.effect ))
                     , HtmlAttr.disabled (Components.Skill.isReady skill |> not)
                     ]
 
@@ -68,18 +69,17 @@ viewSkill ( compId, skill ) =
                     [ HtmlAttr.disabled True
                     ]
     in
-    [ button
+    button
         attrs
-        [ h3 [] [ text skill.name ]
+        [ h3 [] [ text (String.fromInt skillIndex), text " ", text skill.name ]
         , p [] [ text skill.description ]
         , p [] [ text "id: ", text (String.fromInt (Ecs.idToInt compId)) ]
         , p [] [ text "target: ", text targetString ]
         , viewMeter skill.cooldown
         ]
-    ]
 
 
-viewBuff : Buff -> List (Html GameMsg)
+viewBuff : Buff -> Html GameMsg
 viewBuff buff =
     let
         viewDuration b =
@@ -90,58 +90,36 @@ viewBuff buff =
                 Nothing ->
                     p [] [ text "Infinite" ]
     in
-    [ p [ class "buff" ]
+    p [ class "buff" ]
         [ text buff.description
         , br [] []
         , text "duration: "
         , viewDuration buff
         ]
 
-    -- , p [] [ text "effects:" ]
-    -- , ul [] (List.map (\s -> li [] (viewStat s)) buff.effects)
-    -- , p [] [ text "duration: ", viewDuration buff ]
-    ]
+
+viewPart : EcsId -> Part EcsId -> Html GameMsg
+viewPart pid part =
+    div
+        [ class "entity"
+        ]
+        [ h3
+            [ style "color" (toCssString part.color)
+            , Html.Events.onClick (SetSkillTarget pid)
+            ]
+            [ text (idToInt pid |> String.fromInt), text " Module: ", text part.name ]
+        , p [] [ text "durability: ", viewMeter part.durability ]
+        , div [] (List.indexedMap (\i s -> viewSkill pid ( i, s )) part.skills)
+        , div [] (List.map viewBuff part.stats)
+        , div [] (h3 [] [ text "stats" ] :: List.map viewStat (getStats part))
+        ]
 
 
-viewEntity : ( Entity, List ( EcsId, ComponentData.ComponentData ) ) -> Maybe (Html GameMsg)
-viewEntity ( entity, components ) =
-    let
-        color =
-            List.filterMap ComponentData.getColor (List.map Tuple.second components)
-                |> List.head
-                |> Maybe.withDefault (Components.Color.initColor |> Components.Color.withLightness 0)
-                |> Components.Color.toCssString
-
-        clickTargetEvent e =
-            Html.Events.onClick (SetSkillTarget e)
-
-        entityWrapper e cs =
-            div [ class "entity" ]
-                (h2 [ HtmlAttr.style "color" color, clickTargetEvent e ] [ text "Entity" ] :: cs)
-    in
-    case
-        ( List.filterMap ComponentData.getStat (List.map Tuple.second components)
-        , List.filterMap (\( cid, comp ) -> ComponentData.getSkill comp |> Maybe.andThen (\s -> Just ( cid, s ))) components
-        , List.filterMap ComponentData.getBuff (List.map Tuple.second components)
-        )
-    of
-        ( [], [], [] ) ->
-            Nothing
-
-        ( stats, skills, buffs ) ->
-            Just
-                (entityWrapper entity
-                    (List.concatMap viewSkill skills
-                        ++ h3 [] [ text "Stats" ]
-                        :: (Components.Stat.getSumStats (stats ++ List.concatMap (\b -> b.effects) buffs)
-                                |> Maybe.andThen (\ss -> Just (List.concatMap viewStat ss))
-                                |> Maybe.withDefault []
-                           )
-                        ++ List.concatMap viewBuff buffs
-                    )
-                )
+viewEntity2 : EcsId -> ComponentData.ComponentData -> Maybe (Html GameMsg)
+viewEntity2 cid component =
+    ComponentData.getPart component |> Maybe.andThen (\p -> Just (viewPart cid p))
 
 
 viewScene : GameScene -> Html GameMsg
 viewScene scene =
-    div [ class "entities" ] (List.filterMap identity (Ecs.mapEntitiesWithComponents viewEntity scene))
+    div [ class "entities" ] (List.filterMap identity (Ecs.mapComponents viewEntity2 scene))

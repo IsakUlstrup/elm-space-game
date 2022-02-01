@@ -2,6 +2,7 @@ module Systems.BuffSystem exposing (buffSystem)
 
 import ComponentData exposing (ComponentData)
 import Components.Buff
+import Components.Part
 import Ecs
 import GameData exposing (GameMsg(..), GameScene)
 
@@ -16,7 +17,7 @@ buffSystem msg scene =
     case msg of
         GameTick dt ->
             scene
-                |> Ecs.updateComponents (ComponentData.updateBuff (Components.Buff.reduceDuration dt))
+                |> Ecs.updateComponents (ComponentData.updatePart (Components.Part.reduceBuffDuration dt))
                 |> Ecs.filterComponents activeBuff
 
         _ ->
