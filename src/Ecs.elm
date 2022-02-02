@@ -10,6 +10,7 @@ module Ecs exposing
     , entityIdToInt
     , filterComponents
     , idToInt
+    , mapComponentGroups
     , mapComponents
     , runSystems
     , updateComponent
@@ -207,6 +208,43 @@ mapComponents f (Scene scene) =
             func c.id c.data
     in
     List.map (mapCompData f) scene.components
+
+
+compAccum : Component compData -> List ( Entity, List ( EcsId, compData ) ) -> List ( Entity, List ( EcsId, compData ) )
+compAccum i list =
+    let
+        helper : Bool -> Component compData -> List ( Entity, List ( EcsId, compData ) ) -> List ( Entity, List ( EcsId, compData ) ) -> List ( Entity, List ( EcsId, compData ) )
+        helper found (Component c) l input =
+            case input of
+                [] ->
+                    if found then
+                        l
+
+                    else
+                        ( c.parent, [ ( c.id, c.data ) ] ) :: l
+
+                ( entity, components ) :: t ->
+                    if c.parent == entity && not found then
+                        ( entity, ( c.id, c.data ) :: components ) :: helper True (Component c) l t
+
+                    else
+                        ( entity, components ) :: helper found (Component c) l t
+    in
+    list |> helper False i []
+
+
+{-| Returns a list of entities and their attached components if they have any
+-}
+groupComponents : Scene compData msg -> List ( Entity, List ( EcsId, compData ) )
+groupComponents (Scene scene) =
+    List.foldl compAccum [] scene.components
+
+
+{-| map components grouped with parent, useful for rendering
+-}
+mapComponentGroups : (( Entity, List ( EcsId, compData ) ) -> a) -> Scene compData msg -> List a
+mapComponentGroups f scene =
+    List.map f (groupComponents scene)
 
 
 

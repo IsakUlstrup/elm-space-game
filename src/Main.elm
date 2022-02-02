@@ -68,6 +68,31 @@ init =
                     [ skillBuff
                     ]
                 )
+            , partCompData
+                (newPart "Test part"
+                    [ Components.Skill.newSkill 1000
+                        "EMP"
+                        "disables skill cooldown recovery"
+                        (Components.Skill.buffEffect skillBuff)
+                    , Components.Skill.newSkill 1000
+                        "Laser"
+                        "dps"
+                        (Components.Skill.damageEffect 10)
+                    , Components.Skill.newSkill 1000
+                        "Speed boost"
+                        "boosts skill cooldown recovery"
+                        (Components.Skill.buffEffect
+                            (Components.Buff.newBuff
+                                "Spped boost"
+                                "Boosts cooldown recovery"
+                                [ Components.Stat.cooldownRecoveryStat 2 ]
+                                (Just (newMeter 5000 5000))
+                            )
+                        )
+                    ]
+                    [ skillBuff
+                    ]
+                )
             ]
         |> Ecs.addEntity []
         |> Ecs.addEntity []

@@ -7,7 +7,7 @@ import Components.Meter exposing (Meter)
 import Components.Part exposing (Part, getStats)
 import Components.Skill exposing (Skill)
 import Components.Stat exposing (Stat, StatType(..), getStatValue)
-import Ecs exposing (EcsId, idToInt)
+import Ecs exposing (EcsId, Entity, idToInt)
 import GameData exposing (GameMsg(..), GameScene)
 import Html exposing (Html, br, button, div, h3, meter, p, strong, text)
 import Html.Attributes as HtmlAttr exposing (class, style)
@@ -118,6 +118,14 @@ viewEntity2 cid component =
     ComponentData.getPart component |> Maybe.andThen (\p -> Just (viewPart cid p))
 
 
+viewEntity3 : ( Entity, List ( EcsId, ComponentData.ComponentData ) ) -> Html GameMsg
+viewEntity3 ( entity, components ) =
+    div []
+        [ h3 [] [ text "entity" ]
+        , div [ style "display" "flex" ] (List.filterMap (\( cid, cdata ) -> viewEntity2 cid cdata) components)
+        ]
+
+
 viewScene : GameScene -> Html GameMsg
 viewScene scene =
-    div [ class "entities" ] (List.filterMap identity (Ecs.mapComponents viewEntity2 scene))
+    div [] (Ecs.mapComponentGroups viewEntity3 scene)
