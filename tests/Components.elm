@@ -235,7 +235,7 @@ testSkill =
 
 skillBuff : Buff
 skillBuff =
-    Components.Buff.newBuff "Skill buff" "Skill effect buff" [ Components.Stat.powerStat 3 ] (Just (newMeter 1000 1000))
+    Components.Buff.newBuff "Skill buff" "Skill effect buff" [ Components.Stat.powerStat 3 ] (Just 1000)
 
 
 skill : Test

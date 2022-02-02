@@ -3,11 +3,9 @@ module Main exposing (..)
 import Browser
 import Browser.Events
 import ComponentData exposing (partCompData)
-import Components.Buff exposing (Buff)
-import Components.Meter exposing (newMeter)
 import Components.Part exposing (newPart)
-import Components.Skill
-import Components.Stat
+import Content.Buffs
+import Content.Skills
 import Ecs
 import GameData exposing (GameMsg, GameScene)
 import Html exposing (Html)
@@ -15,15 +13,6 @@ import Systems.BuffSystem exposing (buffSystem)
 import Systems.DeathSystem exposing (deathSystem)
 import Systems.SkillSystem exposing (skillSystem)
 import View
-
-
-skillBuff : Buff
-skillBuff =
-    Components.Buff.newBuff
-        "Stasis"
-        "Stops cooldown recovery"
-        [ Components.Stat.cooldownRecoveryStat 3 |> Components.Stat.addModifiers [ Components.Stat.setSubModifier 0 ] ]
-        (Just (newMeter 5000 5000))
 
 
 type Msg
@@ -45,72 +34,35 @@ init =
         |> Ecs.addEntity
             [ partCompData
                 (newPart "Test part"
-                    [ Components.Skill.newSkill 1000
-                        "EMP"
-                        "disables skill cooldown recovery"
-                        (Components.Skill.buffEffect skillBuff)
-                    , Components.Skill.newSkill 1000
-                        "Laser"
-                        "dps"
-                        (Components.Skill.damageEffect 10)
-                    , Components.Skill.newSkill 1000
-                        "Speed boost"
-                        "boosts skill cooldown recovery"
-                        (Components.Skill.buffEffect
-                            (Components.Buff.newBuff
-                                "Spped boost"
-                                "Boosts cooldown recovery"
-                                [ Components.Stat.cooldownRecoveryStat 2 ]
-                                (Just (newMeter 5000 5000))
-                            )
-                        )
+                    [ Content.Skills.emp
+                    , Content.Skills.laser
+                    , Content.Skills.speedBoost
                     ]
-                    [ skillBuff
-                    ]
+                    [ Content.Buffs.stasis (Just 5000) ]
                 )
             , partCompData
                 (newPart "Test part"
-                    [ Components.Skill.newSkill 1000
-                        "EMP"
-                        "disables skill cooldown recovery"
-                        (Components.Skill.buffEffect skillBuff)
-                    , Components.Skill.newSkill 1000
-                        "Laser"
-                        "dps"
-                        (Components.Skill.damageEffect 10)
-                    , Components.Skill.newSkill 1000
-                        "Speed boost"
-                        "boosts skill cooldown recovery"
-                        (Components.Skill.buffEffect
-                            (Components.Buff.newBuff
-                                "Spped boost"
-                                "Boosts cooldown recovery"
-                                [ Components.Stat.cooldownRecoveryStat 2 ]
-                                (Just (newMeter 5000 5000))
-                            )
-                        )
+                    [ Content.Skills.emp
+                    , Content.Skills.laser
+                    , Content.Skills.speedBoost
                     ]
-                    [ skillBuff
-                    ]
+                    [ Content.Buffs.stasis (Just 5000) ]
                 )
             ]
-        |> Ecs.addEntity []
-        |> Ecs.addEntity []
         |> Ecs.addEntity []
         |> Ecs.addEntity
             [ partCompData
                 (newPart "Test part"
-                    [ Components.Skill.newSkill 1000
-                        "Buff skill"
-                        "buffs power"
-                        (Components.Skill.buffEffect skillBuff)
-                    ]
-                    [ Components.Buff.newBuff
-                        "Stasis"
-                        "Stops cooldown recovery"
-                        [ Components.Stat.cooldownRecoveryStat 3 |> Components.Stat.addModifiers [ Components.Stat.setSubModifier 0 ] ]
-                        Nothing
-                    ]
+                    [ Content.Skills.laser ]
+                    []
+                )
+            ]
+        |> Ecs.addEntity []
+        |> Ecs.addEntity
+            [ partCompData
+                (newPart "Test part"
+                    [ Content.Skills.laser ]
+                    [ Content.Buffs.stasis Nothing ]
                 )
             ]
         |> Ecs.addSystem skillSystem

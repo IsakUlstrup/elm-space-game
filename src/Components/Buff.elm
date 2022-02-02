@@ -1,6 +1,6 @@
 module Components.Buff exposing (Buff, isActive, newBuff, reduceDuration)
 
-import Components.Meter exposing (Meter)
+import Components.Meter exposing (Meter, newMeter)
 import Components.Stat exposing (Stat)
 
 
@@ -14,7 +14,7 @@ type alias Buff =
 
 {-| Buff constructor
 -}
-newBuff : String -> String -> List Stat -> Maybe (Meter Float) -> Buff
+newBuff : String -> String -> List Stat -> Maybe Float -> Buff
 newBuff name description effects duration =
     let
         stringWithDefault d s =
@@ -24,11 +24,25 @@ newBuff name description effects duration =
             else
                 s
     in
-    Buff
-        (name |> stringWithDefault "Unnamed buff")
-        (description |> stringWithDefault "Buff description")
-        effects
-        duration
+    case duration of
+        Just dur ->
+            Buff
+                (name |> stringWithDefault "Unnamed buff")
+                (description |> stringWithDefault "Buff description")
+                effects
+                (Just
+                    (newMeter
+                        dur
+                        dur
+                    )
+                )
+
+        Nothing ->
+            Buff
+                (name |> stringWithDefault "Unnamed buff")
+                (description |> stringWithDefault "Buff description")
+                effects
+                Nothing
 
 
 {-| Reduce remaining duration if not infinite

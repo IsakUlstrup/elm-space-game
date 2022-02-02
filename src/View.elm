@@ -63,10 +63,12 @@ viewSkill compId ( skillIndex, skill ) =
                     -- ( EcsId, Int ) ( EcsId, SkillEffect )
                     [ Html.Events.onClick (UseSkill ( compId, skillIndex ) ( trgt, skill.effect ))
                     , HtmlAttr.disabled (Components.Skill.isReady skill |> not)
+                    , class "skill"
                     ]
 
                 Nothing ->
                     [ HtmlAttr.disabled True
+                    , class "skill"
                     ]
     in
     button
@@ -100,7 +102,7 @@ viewBuff buff =
 
 viewPart : EcsId -> Part EcsId -> Html GameMsg
 viewPart pid part =
-    div [ class "entity" ]
+    div [ class "part" ]
         [ h3
             [ style "color" (toCssString part.color)
             , Html.Events.onClick (SetSkillTarget pid)
@@ -120,7 +122,7 @@ viewEntity2 cid component =
 
 viewEntity3 : ( Entity, List ( EcsId, ComponentData.ComponentData ) ) -> Html GameMsg
 viewEntity3 ( entity, components ) =
-    div []
+    div [ class "entity" ]
         [ h3 [] [ text "entity" ]
         , div [ style "display" "flex" ] (List.filterMap (\( cid, cdata ) -> viewEntity2 cid cdata) components)
         ]
@@ -128,4 +130,4 @@ viewEntity3 ( entity, components ) =
 
 viewScene : GameScene -> Html GameMsg
 viewScene scene =
-    div [] (Ecs.mapComponentGroups viewEntity3 scene)
+    div [ style "display" "flex" ] (Ecs.mapComponentGroups viewEntity3 scene)

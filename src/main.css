@@ -31,12 +31,23 @@ body {
   border-radius: 0.3rem;
   margin: 1rem;
   padding: 1rem;
-  width: 15rem;
 }
 
-.buff {
+.buff, .skill {
   border: 1px solid magenta;
   border-radius: 0.2rem;
   margin: 0.5rem;
   padding: 0.5rem;
+  width: 8rem;
+}
+
+.part {
+  border: 1px solid rgb(110, 110, 110);
+  padding: 1rem;
+  margin: 0.5rem;
+  width: 10rem;
+}
+
+.skill {
+  border: 1px solid green;
 }
