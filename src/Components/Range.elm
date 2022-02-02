@@ -27,15 +27,22 @@ type Range number
 
 
 {-| Create new Range
+
+If high is less than low, high will be set to low
+
 -}
 newRange : number -> number -> number -> Range number
 newRange low high val =
     let
         clampedHigh =
-            clamp low high val
+            if high < low then
+                low
+
+            else
+                high
     in
     Range
-        { value = clamp 0 clampedHigh val
+        { value = clamp low clampedHigh val
         , low = low
         , high = clampedHigh
         }
