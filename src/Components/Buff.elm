@@ -1,6 +1,6 @@
 module Components.Buff exposing (Buff, isActive, newBuff, reduceDuration)
 
-import Components.Meter exposing (Meter, newMeter)
+import Components.Range exposing (Range, newRange)
 import Components.Stat exposing (Stat)
 
 
@@ -8,7 +8,7 @@ type alias Buff =
     { name : String
     , description : String
     , effects : List Stat
-    , duration : Maybe (Meter Float)
+    , duration : Maybe (Range Float)
     }
 
 
@@ -31,7 +31,8 @@ newBuff name description effects duration =
                 (description |> stringWithDefault "Buff description")
                 effects
                 (Just
-                    (newMeter
+                    (newRange
+                        0
                         dur
                         dur
                     )
@@ -51,7 +52,7 @@ reduceDuration : Float -> Buff -> Buff
 reduceDuration amount buff =
     case buff.duration of
         Just duration ->
-            { buff | duration = Just (Components.Meter.subtract amount duration) }
+            { buff | duration = Just (Components.Range.subtract amount duration) }
 
         Nothing ->
             buff
@@ -63,7 +64,7 @@ isActive : Buff -> Bool
 isActive buff =
     case buff.duration of
         Just duration ->
-            Components.Meter.isEmpty duration |> not
+            Components.Range.isEmpty duration |> not
 
         Nothing ->
             True

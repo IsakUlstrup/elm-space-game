@@ -1,6 +1,6 @@
 module Components.Color exposing (Color, initColor, toCssString, withHue, withLightness, withSaturation)
 
-import Components.Meter as Meter exposing (Meter)
+import Components.Range as Range exposing (Range, newRange)
 
 
 {-| HSL color
@@ -15,9 +15,9 @@ Lightness is also a percentage; 0% is black, 100% is white.
 
 -}
 type alias Color =
-    { hue : Meter Float
-    , saturation : Meter Float
-    , lightness : Meter Float
+    { hue : Range Float
+    , saturation : Range Float
+    , lightness : Range Float
     }
 
 
@@ -26,30 +26,30 @@ type alias Color =
 initColor : Color
 initColor =
     Color
-        (Meter.newMeter 0 360)
-        (Meter.newMeter 100 100)
-        (Meter.newMeter 50 100)
+        (newRange 0 0 360)
+        (newRange 0 100 100)
+        (newRange 0 50 100)
 
 
 {-| Set color hue, values above 360 will be wrapped around
 -}
 withHue : Float -> Color -> Color
 withHue hue color =
-    { color | hue = Meter.setValueWrap hue color.hue }
+    { color | hue = Range.setValueWrap hue color.hue }
 
 
 {-| Set color saturation, values will be clamped to 0-100
 -}
 withSaturation : Float -> Color -> Color
 withSaturation saturation color =
-    { color | saturation = Meter.setValue saturation color.saturation }
+    { color | saturation = Range.setValue saturation color.saturation }
 
 
 {-| Set color lightness, values will be clamped to 0-100
 -}
 withLightness : Float -> Color -> Color
 withLightness lightness color =
-    { color | lightness = Meter.setValue lightness color.lightness }
+    { color | lightness = Range.setValue lightness color.lightness }
 
 
 {-| Convert color to string, for use in CSS
@@ -58,9 +58,9 @@ toCssString : Color -> String
 toCssString color =
     -- hsl(180, 50%, 50%)
     "hsl("
-        ++ (Meter.getValue color.hue |> String.fromFloat)
+        ++ (Range.getValue color.hue |> String.fromFloat)
         ++ ", "
-        ++ (Meter.getValue color.saturation |> String.fromFloat)
+        ++ (Range.getValue color.saturation |> String.fromFloat)
         ++ "%, "
-        ++ (Meter.getValue color.lightness |> String.fromFloat)
+        ++ (Range.getValue color.lightness |> String.fromFloat)
         ++ "%)"

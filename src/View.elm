@@ -3,8 +3,8 @@ module View exposing (..)
 import ComponentData
 import Components.Buff exposing (Buff)
 import Components.Color exposing (toCssString)
-import Components.Meter exposing (Meter)
 import Components.Part exposing (Part, getStats)
+import Components.Range exposing (Range)
 import Components.Skill exposing (Skill)
 import Components.Stat exposing (Stat, StatType(..), getStatValue)
 import Ecs exposing (EcsId, Entity, idToInt)
@@ -31,11 +31,11 @@ viewStat stat =
         ]
 
 
-viewMeter : Meter Float -> Html msg
+viewMeter : Range Float -> Html msg
 viewMeter m =
     let
         stringAttrs =
-            Components.Meter.viewHelperFloat m
+            Components.Range.viewHelperFloat m
     in
     meter
         [ HtmlAttr.min stringAttrs.min

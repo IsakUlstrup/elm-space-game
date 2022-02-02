@@ -12,7 +12,7 @@ module Components.Skill exposing
     )
 
 import Components.Buff exposing (Buff)
-import Components.Meter exposing (Meter, isEmpty, newMeter, setFull, subtract)
+import Components.Range exposing (Range, isEmpty, newRange, setHigh, subtract)
 
 
 {-| Determines what effect a skill has on use
@@ -39,7 +39,7 @@ buffEffect buff =
 {-| Skill type. cooldown moves from cooldown time to 0. So a skill with cooldownLeft = 0 is ready to use
 -}
 type alias Skill t =
-    { cooldown : Meter Float
+    { cooldown : Range Float
     , name : String
     , description : String
     , target : Maybe t
@@ -65,7 +65,7 @@ newSkill cooldown name description effect =
                 n
     in
     Skill
-        (newMeter cooldown cooldown)
+        (newRange 0 cooldown cooldown)
         (defaultString name "Unnamed Skill")
         (defaultString description "Skill description")
         Nothing
@@ -76,7 +76,7 @@ newSkill cooldown name description effect =
 -}
 resetCooldown : Skill t -> Skill t
 resetCooldown skill =
-    { skill | cooldown = setFull skill.cooldown }
+    { skill | cooldown = setHigh skill.cooldown }
 
 
 {-| Reduce skill cooldown by amount

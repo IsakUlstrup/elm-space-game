@@ -2,7 +2,7 @@ module Components.Part exposing (..)
 
 import Components.Buff exposing (Buff)
 import Components.Color exposing (Color, initColor)
-import Components.Meter exposing (Meter, isEmpty, newMeter, subtract)
+import Components.Range exposing (Range, isEmpty, newRange, subtract)
 import Components.Skill exposing (Skill, SkillEffect(..))
 import Components.Stat exposing (Stat, getStatValue, getSumStats)
 
@@ -11,14 +11,14 @@ type alias Part t =
     { name : String
     , skills : List (Skill t)
     , stats : List Buff
-    , durability : Meter Float
+    , durability : Range Float
     , color : Color
     }
 
 
 newPart : String -> List (Skill t) -> List Buff -> Part t
 newPart name skills buffs =
-    Part name skills buffs (newMeter 100 100) initColor
+    Part name skills buffs (newRange 0 100 100) initColor
 
 
 {-| Reduce all part skill cooldowns based on cooldown recovery stat
