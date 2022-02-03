@@ -13,7 +13,7 @@ import Html exposing (Html)
 import Systems.BuffSystem exposing (buffSystem)
 import Systems.DeathSystem exposing (deathSystem)
 import Systems.SkillSystem exposing (skillSystem)
-import View
+import View.View
 
 
 type Msg
@@ -96,7 +96,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    Html.map GameMsg (View.lazyViewScene model)
+    Html.map GameMsg (View.View.lazyViewScene model)
 
 
 

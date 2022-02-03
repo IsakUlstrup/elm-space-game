@@ -21,6 +21,60 @@ body {
   padding: 2rem;
 }
 
+/* VECTOR DISPLAY */
+.vector-display-container {
+  position: relative;
+  padding: 1rem;
+  padding-bottom: 0.8rem;
+  /* background: radial-gradient(rgb(0, 0, 0) 60%, rgb(78, 78, 78) 70%); */
+  background: #181818;
+  border-radius: 50%;
+  border: 0.1rem white solid;
+  box-shadow: 0 0 1.5rem rgb(207, 207, 207) inset;
+}
+
+.vector-display {
+  background: rgb(35, 98, 117);
+  border-radius: 50%;
+  box-shadow: 0 0 4rem black inset;
+  border: 1px solid black;
+}
+
+.vector-display-container::after {
+  content: "";
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  /* border: 0.1rem solid rgb(48, 48, 48); */
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(1000% 1000% at 70% bottom, rgba(255, 255, 255, 0) 9%, rgba(255, 255, 255, 0.2) 9%, rgba(255, 255, 255, 0) 15%);
+}
+
+.vector-display g:hover {
+  stroke: rgb(0, 174, 255);
+}
+
+.vector-path {
+  fill-opacity: 0; 
+  stroke-width: 0.5; 
+  stroke: rgb(114, 234, 255); 
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url(#glow);
+}
+
+.vector-path-burn {
+  stroke: white; 
+  fill: white; 
+  filter: url(#glow);
+  opacity: 0.7;
+}
+
+
+
 .entities {
   display: flex;
   flex-wrap: wrap;

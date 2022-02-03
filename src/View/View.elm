@@ -1,4 +1,4 @@
-module View exposing (..)
+module View.View exposing (..)
 
 import ComponentData
 import Components.Color exposing (toCssString)
