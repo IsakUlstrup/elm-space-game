@@ -1,10 +1,9 @@
 module Components.Part exposing (..)
 
-import Components.Buff exposing (Buff)
 import Components.Color exposing (Color, initColor)
 import Components.Range exposing (Range, isEmpty, newRange, subtract)
 import Components.Skill exposing (Skill, SkillEffect(..))
-import Components.Stat exposing (Stat, getStatValue, getSumStats)
+import Components.Stat exposing (Buff, Stat, getStatValue, getSumStats)
 
 
 type alias Part t =
@@ -59,8 +58,8 @@ reduceBuffDuration amount part =
     { part
         | stats =
             part.stats
-                |> List.map (Components.Buff.reduceDuration amount)
-                |> List.filter Components.Buff.isActive
+                |> List.map (Components.Stat.reduceDuration amount)
+                |> List.filter Components.Stat.isActive
     }
 
 

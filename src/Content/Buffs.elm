@@ -1,7 +1,6 @@
 module Content.Buffs exposing (..)
 
-import Components.Buff exposing (Buff, newBuff)
-import Components.Stat
+import Components.Stat exposing (Buff, newBuff)
 
 
 stasis : Maybe Float -> Buff
@@ -15,7 +14,7 @@ stasis duration =
 
 speedBoost : Maybe Float -> Buff
 speedBoost duration =
-    Components.Buff.newBuff
+    Components.Stat.newBuff
         "Spped boost"
         "Boosts cooldown recovery"
         [ Components.Stat.cooldownRecoveryStat 2 ]

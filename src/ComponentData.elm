@@ -19,11 +19,10 @@ module ComponentData exposing
     , updateStat
     )
 
-import Components.Buff exposing (Buff)
 import Components.Color exposing (Color)
 import Components.Part exposing (Part)
 import Components.Skill exposing (Skill)
-import Components.Stat exposing (Stat)
+import Components.Stat exposing (Buff, Stat)
 import Ecs exposing (EcsId)
 
 

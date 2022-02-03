@@ -1,11 +1,10 @@
 module Components exposing (..)
 
 import ComponentData exposing (getSkill, getStat, skillCompData, statCompData, updateSkill)
-import Components.Buff exposing (Buff)
 import Components.Color
 import Components.Range exposing (newRange)
 import Components.Skill exposing (Skill, SkillEffect(..), buffEffect, damageEffect, newSkill, reduceCooldown, resetCooldown)
-import Components.Stat exposing (StatModifier(..), StatType(..), powerStat)
+import Components.Stat exposing (Buff, StatModifier(..), StatType(..), powerStat)
 import Expect
 import Fuzz exposing (..)
 import Test exposing (..)
@@ -235,7 +234,7 @@ testSkill =
 
 skillBuff : Buff
 skillBuff =
-    Components.Buff.newBuff "Skill buff" "Skill effect buff" [ Components.Stat.powerStat 3 ] (Just 1000)
+    Components.Stat.newBuff "Skill buff" "Skill effect buff" [ Components.Stat.powerStat 3 ] (Just 1000)
 
 
 skill : Test
@@ -500,7 +499,7 @@ buff =
         [ test "Reduce duration on infinite buff" <|
             \_ ->
                 testInfiniteBuff
-                    |> Components.Buff.reduceDuration 16
+                    |> Components.Stat.reduceDuration 16
                     |> Expect.equal
                         { name = "Buff"
                         , description = "A buff"
@@ -510,7 +509,7 @@ buff =
         , test "Reduce duration on buff" <|
             \_ ->
                 testBuff
-                    |> Components.Buff.reduceDuration 10
+                    |> Components.Stat.reduceDuration 10
                     |> Expect.equal
                         { name = "Buff"
                         , description = "A buff"
@@ -520,14 +519,14 @@ buff =
         , test "Check if infinite buff is active" <|
             \_ ->
                 testInfiniteBuff
-                    |> Components.Buff.isActive
+                    |> Components.Stat.isActive
                     |> Expect.equal
                         True
         , test "Check if buff is active" <|
             \_ ->
                 testBuff
-                    |> Components.Buff.reduceDuration 99999
-                    |> Components.Buff.isActive
+                    |> Components.Stat.reduceDuration 99999
+                    |> Components.Stat.isActive
                     |> Expect.equal
                         False
         ]

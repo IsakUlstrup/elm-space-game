@@ -1,12 +1,11 @@
 module View exposing (..)
 
 import ComponentData
-import Components.Buff exposing (Buff)
 import Components.Color exposing (toCssString)
 import Components.Part exposing (Part, getStats)
 import Components.Range exposing (Range)
 import Components.Skill exposing (Skill)
-import Components.Stat exposing (Stat, StatType(..), getStatValue)
+import Components.Stat exposing (Buff, Stat, StatType(..), getStatValue)
 import Ecs exposing (EcsId, Entity, idToInt)
 import GameData exposing (GameMsg(..), GameScene)
 import Html exposing (Html, br, button, div, h3, meter, p, strong, text)

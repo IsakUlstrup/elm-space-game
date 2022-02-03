@@ -11,8 +11,8 @@ module Components.Skill exposing
     , unsetTarget
     )
 
-import Components.Buff exposing (Buff)
 import Components.Range exposing (Range, isEmpty, newRange, setHigh, subtract)
+import Components.Stat exposing (Buff)
 
 
 {-| Determines what effect a skill has on use
