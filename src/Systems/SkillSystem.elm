@@ -1,6 +1,7 @@
 module Systems.SkillSystem exposing (skillSystem)
 
 import ComponentData
+import Components.Core
 import Components.Part
 import Components.Skill exposing (SkillEffect(..))
 import Ecs
@@ -21,6 +22,7 @@ skillSystem msg scene =
                     scene
                         |> Ecs.updateComponent partId (ComponentData.updatePart (Components.Part.resetSkillCooldown skillIndex))
                         |> Ecs.updateComponent targetId (ComponentData.updatePart (Components.Part.damage dmg))
+                        |> Ecs.updateComponent targetId (ComponentData.updateCore (Components.Core.damage dmg))
 
                 Buff buff ->
                     scene

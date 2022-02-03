@@ -2,7 +2,8 @@ module Main exposing (..)
 
 import Browser
 import Browser.Events
-import ComponentData exposing (partCompData)
+import ComponentData exposing (coreCompData, partCompData)
+import Components.Core
 import Components.Part exposing (newPart)
 import Content.Buffs
 import Content.Skills
@@ -33,7 +34,7 @@ init =
     ( Ecs.emptyScene 0
         |> Ecs.addEntity
             [ partCompData
-                (newPart "Test part"
+                (newPart "Super part"
                     [ Content.Skills.emp
                     , Content.Skills.laser
                     , Content.Skills.speedBoost
@@ -41,29 +42,32 @@ init =
                     [ Content.Buffs.stasis (Just 5000) ]
                 )
             , partCompData
-                (newPart "Test part"
+                (newPart "Super part"
                     [ Content.Skills.emp
                     , Content.Skills.laser
                     , Content.Skills.speedBoost
                     ]
                     [ Content.Buffs.stasis (Just 5000) ]
                 )
+            , coreCompData (Components.Core.newPlayerCore True)
             ]
         |> Ecs.addEntity []
         |> Ecs.addEntity
             [ partCompData
-                (newPart "Test part"
+                (newPart "Laser"
                     [ Content.Skills.laser ]
                     []
                 )
+            , coreCompData Components.Core.newFactionCore
             ]
         |> Ecs.addEntity []
         |> Ecs.addEntity
             [ partCompData
-                (newPart "Test part"
+                (newPart "Laser/Stasis"
                     [ Content.Skills.laser ]
                     [ Content.Buffs.stasis Nothing ]
                 )
+            , coreCompData Components.Core.newFactionCore
             ]
         |> Ecs.addSystem skillSystem
         |> Ecs.addSystem buffSystem
@@ -92,7 +96,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    Html.map GameMsg (View.viewScene model)
+    Html.map GameMsg (View.lazyViewScene model)
 
 
 

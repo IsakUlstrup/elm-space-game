@@ -3,8 +3,11 @@ module ComponentData exposing
     , buffCompData
     , buffPred
     , colorCompData
+    , coreCompData
+    , corePred
     , getBuff
     , getColor
+    , getCore
     , getPart
     , getSkill
     , getStat
@@ -14,12 +17,14 @@ module ComponentData exposing
     , statCompData
     , updateBuff
     , updateColor
+    , updateCore
     , updatePart
     , updateSkill
     , updateStat
     )
 
 import Components.Color exposing (Color)
+import Components.Core exposing (Core)
 import Components.Part exposing (Part)
 import Components.Skill exposing (Skill)
 import Components.Stat exposing (Buff, Stat)
@@ -32,6 +37,7 @@ type ComponentData
     | ColorData Color
     | BuffData Buff
     | PartData (Part Ecs.EcsId)
+    | CoreData Core
 
 
 
@@ -227,6 +233,53 @@ partPred : (Part EcsId -> Bool) -> ComponentData -> Bool
 partPred f cd =
     case cd of
         PartData b ->
+            f b
+
+        _ ->
+            True
+
+
+
+---- CORE ----
+
+
+{-| Contruct new CoreData with provided core
+-}
+coreCompData : Core -> ComponentData
+coreCompData core =
+    CoreData core
+
+
+{-| If given ComponentData is a core, return core
+-}
+getCore : ComponentData -> Maybe Core
+getCore cd =
+    case cd of
+        CoreData c ->
+            Just c
+
+        _ ->
+            Nothing
+
+
+{-| If given ComponentData is a core, apply f to it and return
+-}
+updateCore : (Core -> Core) -> ComponentData -> ComponentData
+updateCore f cd =
+    case cd of
+        CoreData s ->
+            CoreData (f s)
+
+        _ ->
+            cd
+
+
+{-| Core predicate
+-}
+corePred : (Core -> Bool) -> ComponentData -> Bool
+corePred f cd =
+    case cd of
+        CoreData b ->
             f b
 
         _ ->

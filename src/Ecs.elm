@@ -210,6 +210,8 @@ mapComponents f (Scene scene) =
     List.map (mapCompData f) scene.components
 
 
+{-| given a component and a list of ( Entity, List ( EcsId, compData ) ), add component data to one of the lists
+-}
 compAccum : Component compData -> List ( Entity, List ( EcsId, compData ) ) -> List ( Entity, List ( EcsId, compData ) )
 compAccum i list =
     let
@@ -240,7 +242,7 @@ groupComponents (Scene scene) =
     List.foldl compAccum [] scene.components
 
 
-{-| map components grouped with parent, useful for rendering
+{-| map components grouped by parent, useful for rendering
 -}
 mapComponentGroups : (( Entity, List ( EcsId, compData ) ) -> a) -> Scene compData msg -> List a
 mapComponentGroups f scene =
